@@ -1,4 +1,5 @@
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class TestPalindrome {
@@ -28,5 +29,16 @@ public class TestPalindrome {
         for (String word : nonPalindromeList) {
             assertFalse(palindrome.isPalindrome(word));
         }
+    }
+
+    @Test
+    public void testIsPalindromeOffByOne() {
+        CharacterComparator offByOne = new OffByOne();
+
+        assertTrue(palindrome.isPalindrome("flake", offByOne));
+
+        // words derived from "madam"
+        assertFalse(palindrome.isPalindrome("madop", offByOne));
+        assertTrue(palindrome.isPalindrome("madbl", offByOne));
     }
 }
