@@ -150,18 +150,31 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    public String getElements() {
-        if (size == 0) {
-            return "";
-        }
-        List<String> elements = new ArrayList<>();
+    public List<T> getElementsAsList() {
+        List<T> elements = new ArrayList<>();
 
         int counter = 0;
         int pointer = (nextFirst + 1) % items.length;
         while (counter < size) {
-            elements.add(items[pointer].toString());
+            elements.add(items[pointer]);
             counter += 1;
             pointer = (pointer + 1) % items.length;
+        }
+
+        return elements;
+    }
+
+    @Override
+    public String getElements() {
+        if (size == 0) {
+            return "";
+        }
+
+        List<String> elements = new ArrayList<>();
+        List<T> rawElements = getElementsAsList();
+
+        for (int i = 0; i < rawElements.size(); i++) {
+            elements.add(rawElements.get(i).toString());
         }
 
         return String.join(" | ", elements);

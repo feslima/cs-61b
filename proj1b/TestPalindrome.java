@@ -15,4 +15,18 @@ public class TestPalindrome {
         }
         assertEquals("persiflage", actual);
     }
+
+    @Test
+    public void testAssertWordIsPalindrome() {
+        String[] palindromeList = {"madam", "nun", "a", "racecar", "noon", ""};
+
+        for (String word : palindromeList) {
+            assertTrue(palindrome.isPalindrome(word));
+        }
+
+        String[] nonPalindromeList = {"persiflage", "cat", "horse", "rancor", "aaaaab"};
+        for (String word : nonPalindromeList) {
+            assertFalse(palindrome.isPalindrome(word));
+        }
+    }
 }
