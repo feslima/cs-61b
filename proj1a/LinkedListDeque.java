@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class LinkedListDeque<T> {
     public static class Node<T> {
         public T item;
@@ -58,7 +55,7 @@ public class LinkedListDeque<T> {
         sentinel.next = newFirst;
         newFirst.prev = sentinel;
         size -= 1;
-       return currentFirst.item;
+        return currentFirst.item;
     }
 
     public T removeLast() {
@@ -84,7 +81,7 @@ public class LinkedListDeque<T> {
         int counter = 0;
         while (p.item != null) {
             if (counter == index) {
-                result =  p.item;
+                result = p.item;
             }
             p = p.next;
             counter += 1;
@@ -93,7 +90,7 @@ public class LinkedListDeque<T> {
         return result;
     }
 
-    private T getRecursive(Node<T> node,int index, int counter) {
+    private T getRecursive(Node<T> node, int index, int counter) {
         if (index == counter) {
             return node.item;
         }
@@ -103,6 +100,7 @@ public class LinkedListDeque<T> {
 
         return getRecursive(node.next, index, counter + 1);
     }
+
     public T getRecursive(int index) {
         if (size == 0 || index > size) {
             return null;
@@ -121,14 +119,23 @@ public class LinkedListDeque<T> {
     }
 
     public String getElements() {
-        List<String> items = new ArrayList<>();
+        String elements = "";
+        if (size == 0) {
+            return elements;
+        }
 
         Node<T> p = sentinel.next;
+        int counter = 0;
         while (p.item != null) {
-            items.add(p.item.toString());
+            String delimiter = " | ";
+            if (counter == size - 1) {
+                delimiter = "";
+            }
+            elements = elements + p.item.toString() + delimiter;
+            counter += 1;
             p = p.next;
         }
 
-        return String.join(" | ", items);
+        return elements;
     }
 }
