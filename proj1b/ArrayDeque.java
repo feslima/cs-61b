@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayDeque<T> implements Deque<T> {
     private int size;
     private int nextFirst;
@@ -18,6 +15,10 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     private void copyArray(T[] oldItems, T[] newItems) {
+        if (oldItems.length == 0) {
+            return;
+        }
+
         int counter = 0;
         int pointer = (nextFirst + 1) % oldItems.length;
         while (counter < size) {
@@ -118,7 +119,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
@@ -142,42 +143,11 @@ public class ArrayDeque<T> implements Deque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
         return removedItem;
-    }
-
-    @Override
-    public List<T> getElementsAsList() {
-        List<T> elements = new ArrayList<>();
-
-        int counter = 0;
-        int pointer = (nextFirst + 1) % items.length;
-        while (counter < size) {
-            elements.add(items[pointer]);
-            counter += 1;
-            pointer = (pointer + 1) % items.length;
-        }
-
-        return elements;
-    }
-
-    @Override
-    public String getElements() {
-        if (size == 0) {
-            return "";
-        }
-
-        List<String> elements = new ArrayList<>();
-        List<T> rawElements = getElementsAsList();
-
-        for (int i = 0; i < rawElements.size(); i++) {
-            elements.add(rawElements.get(i).toString());
-        }
-
-        return String.join(" | ", elements);
     }
 
     @Override
