@@ -113,7 +113,7 @@ public class ArrayDeque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
@@ -136,7 +136,7 @@ public class ArrayDeque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
