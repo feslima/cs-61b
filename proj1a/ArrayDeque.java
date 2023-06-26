@@ -15,6 +15,10 @@ public class ArrayDeque<T> {
     }
 
     private void copyArray(T[] oldItems, T[] newItems) {
+        if (oldItems.length == 0) {
+            return;
+        }
+
         int counter = 0;
         int pointer = (nextFirst + 1) % oldItems.length;
         while (counter < size) {
@@ -137,27 +141,6 @@ public class ArrayDeque<T> {
         }
 
         return removedItem;
-    }
-
-    public String getElements() {
-        String elements = "";
-        if (size == 0) {
-            return elements;
-        }
-
-        int counter = 0;
-        int pointer = (nextFirst + 1) % items.length;
-        while (counter < size) {
-            String delimiter = " | ";
-            if (counter == size - 1) {
-                delimiter = "";
-            }
-            elements = elements + items[pointer].toString() + delimiter;
-            counter += 1;
-            pointer = (pointer + 1) % items.length;
-        }
-
-        return elements;
     }
 
     public void printDeque() {
