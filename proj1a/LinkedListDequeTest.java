@@ -2,6 +2,17 @@
  * Performs some basic linked list tests.
  */
 public class LinkedListDequeTest {
+    private static class Node<T> {
+        private T item;
+        private Node<T> next;
+        private Node<T> prev;
+
+        public Node(T value, Node<T> n, Node<T> p) {
+            item = value;
+            next = n;
+            prev = p;
+        }
+    }
 
     /* Utility method for printing out empty checks. */
     public static boolean checkEmpty(boolean expected, boolean actual) {
@@ -51,6 +62,27 @@ public class LinkedListDequeTest {
         }
     }
 
+    public static String getElements(LinkedListDeque lld) {
+        String elements = "";
+        if (lld.size() == 0) {
+            return elements;
+        }
+
+        Object p = lld.get(0);
+        int counter = 0;
+        while (p != null) {
+            String delimiter = " | ";
+            if (counter == lld.size() - 1) {
+                delimiter = "";
+            }
+            elements = elements + p.toString() + delimiter;
+            counter += 1;
+            p = lld.get(counter);
+        }
+
+        return elements;
+    }
+
     /**
      * Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
@@ -69,15 +101,15 @@ public class LinkedListDequeTest {
         // It's a binary operator that returns true if both arguments true, and false otherwise.
         passed = checkSize(1, lld1.size()) && passed;
         passed = checkEmpty(false, lld1.isEmpty()) && passed;
-        passed = checkElements("front", lld1.getElements()) && passed;
+        passed = checkElements("front", getElements(lld1)) && passed;
 
         lld1.addLast("middle");
         passed = checkSize(2, lld1.size()) && passed;
-        passed = checkElements("front | middle", lld1.getElements()) && passed;
+        passed = checkElements("front | middle", getElements(lld1)) && passed;
 
         lld1.addLast("back");
         passed = checkSize(3, lld1.size()) && passed;
-        passed = checkElements("front | middle | back", lld1.getElements()) && passed;
+        passed = checkElements("front | middle | back", getElements(lld1)) && passed;
 
         System.out.println("Printing out deque: ");
         lld1.printDeque();
@@ -92,33 +124,33 @@ public class LinkedListDequeTest {
 
         System.out.println("Running add/remove test.");
 
-		LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
-		// should be empty 
-		boolean passed = checkEmpty(true, lld1.isEmpty());
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        // should be empty
+        boolean passed = checkEmpty(true, lld1.isEmpty());
 
-		lld1.addFirst(10);
-		// should not be empty 
-		passed = checkEmpty(false, lld1.isEmpty()) && passed;
+        lld1.addFirst(10);
+        // should not be empty
+        passed = checkEmpty(false, lld1.isEmpty()) && passed;
 
-		lld1.removeFirst();
-		// should be empty 
-		passed = checkEmpty(true, lld1.isEmpty()) && passed;
+        lld1.removeFirst();
+        // should be empty
+        passed = checkEmpty(true, lld1.isEmpty()) && passed;
 
         lld1.addFirst(10);
         lld1.addFirst(20);
         lld1.addFirst(30);
 
         lld1.removeFirst();
-        passed = checkElements("20 | 10", lld1.getElements()) && passed;
+        passed = checkElements("20 | 10", getElements(lld1)) && passed;
 
         lld1.removeLast();
-        passed = checkElements("20", lld1.getElements()) && passed;
+        passed = checkElements("20", getElements(lld1)) && passed;
 
         lld1.removeLast();
-        passed = checkElements("", lld1.getElements()) && passed;
+        passed = checkElements("", getElements(lld1)) && passed;
         passed = checkEmpty(true, lld1.isEmpty()) && passed;
 
-		printTestStatus(passed);
+        printTestStatus(passed);
     }
 
     public static void getTest() {
@@ -154,4 +186,4 @@ public class LinkedListDequeTest {
         addRemoveTest();
         getTest();
     }
-} 
+}

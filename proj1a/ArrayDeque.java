@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayDeque<T> {
     private int size;
     private int nextFirst;
@@ -18,6 +15,10 @@ public class ArrayDeque<T> {
     }
 
     private void copyArray(T[] oldItems, T[] newItems) {
+        if (oldItems.length == 0) {
+            return;
+        }
+
         int counter = 0;
         int pointer = (nextFirst + 1) % oldItems.length;
         while (counter < size) {
@@ -112,7 +113,7 @@ public class ArrayDeque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
@@ -135,28 +136,11 @@ public class ArrayDeque<T> {
 
         size -= 1;
 
-        if (getUsageRatio() <= getUsageRatioThreshold()) {
+        if (getUsageRatio() <= getUsageRatioThreshold() && size > 8) {
             downsize();
         }
 
         return removedItem;
-    }
-
-    public String getElements() {
-        if (size == 0) {
-            return "";
-        }
-        List<String> elements = new ArrayList<>();
-
-        int counter = 0;
-        int pointer = (nextFirst + 1) % items.length;
-        while (counter < size) {
-            elements.add(items[pointer].toString());
-            counter += 1;
-            pointer = (pointer + 1) % items.length;
-        }
-
-        return String.join(" | ", elements);
     }
 
     public void printDeque() {
