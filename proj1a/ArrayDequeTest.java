@@ -51,7 +51,7 @@ public class ArrayDequeTest {
         }
     }
 
-    public static String getElements(ArrayDeque ad){
+    public static String getElements(ArrayDeque ad) {
         String elements = "";
         int size = ad.size();
         if (size == 0) {
@@ -112,17 +112,17 @@ public class ArrayDequeTest {
 
         System.out.println("Running add/remove test.");
 
-		ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
-		// should be empty 
-		boolean passed = checkEmpty(true, ad1.isEmpty());
+        ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
+        // should be empty
+        boolean passed = checkEmpty(true, ad1.isEmpty());
 
-		ad1.addFirst(10);
-		// should not be empty 
-		passed = checkEmpty(false, ad1.isEmpty()) && passed;
+        ad1.addFirst(10);
+        // should not be empty
+        passed = checkEmpty(false, ad1.isEmpty()) && passed;
 
-		ad1.removeFirst();
-		// should be empty 
-		passed = checkEmpty(true, ad1.isEmpty()) && passed;
+        ad1.removeFirst();
+        // should be empty
+        passed = checkEmpty(true, ad1.isEmpty()) && passed;
 
         ad1.addFirst(10);
         ad1.addFirst(20);
@@ -138,7 +138,7 @@ public class ArrayDequeTest {
         passed = checkElements("", getElements(ad1)) && passed;
         passed = checkEmpty(true, ad1.isEmpty()) && passed;
 
-		printTestStatus(passed);
+        printTestStatus(passed);
     }
 
     public static void getTest() {
