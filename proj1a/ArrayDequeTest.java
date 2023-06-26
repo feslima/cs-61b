@@ -51,6 +51,26 @@ public class ArrayDequeTest {
         }
     }
 
+    public static String getElements(ArrayDeque ad){
+        String elements = "";
+        int size = ad.size();
+        if (size == 0) {
+            return elements;
+        }
+
+        int counter = 0;
+        while (counter < size) {
+            String delimiter = " | ";
+            if (counter == size - 1) {
+                delimiter = "";
+            }
+            elements = elements + ad.get(counter).toString() + delimiter;
+            counter += 1;
+        }
+
+        return elements;
+    }
+
     /**
      * Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
@@ -69,15 +89,15 @@ public class ArrayDequeTest {
         // It's a binary operator that returns true if both arguments true, and false otherwise.
         passed = checkSize(1, ad1.size()) && passed;
         passed = checkEmpty(false, ad1.isEmpty()) && passed;
-        passed = checkElements("front", ad1.getElements()) && passed;
+        passed = checkElements("front", getElements(ad1)) && passed;
 
         ad1.addLast("middle");
         passed = checkSize(2, ad1.size()) && passed;
-        passed = checkElements("front | middle", ad1.getElements()) && passed;
+        passed = checkElements("front | middle", getElements(ad1)) && passed;
 
         ad1.addLast("back");
         passed = checkSize(3, ad1.size()) && passed;
-        passed = checkElements("front | middle | back", ad1.getElements()) && passed;
+        passed = checkElements("front | middle | back", getElements(ad1)) && passed;
 
         System.out.println("Printing out deque: ");
         ad1.printDeque();
@@ -109,13 +129,13 @@ public class ArrayDequeTest {
         ad1.addFirst(30);
 
         ad1.removeFirst();
-        passed = checkElements("20 | 10", ad1.getElements()) && passed;
+        passed = checkElements("20 | 10", getElements(ad1)) && passed;
 
         ad1.removeLast();
-        passed = checkElements("20", ad1.getElements()) && passed;
+        passed = checkElements("20", getElements(ad1)) && passed;
 
         ad1.removeLast();
-        passed = checkElements("", ad1.getElements()) && passed;
+        passed = checkElements("", getElements(ad1)) && passed;
         passed = checkEmpty(true, ad1.isEmpty()) && passed;
 
 		printTestStatus(passed);
@@ -155,14 +175,14 @@ public class ArrayDequeTest {
         ad1.addLast("g");
         ad1.addLast("h");
 
-        boolean passed = checkElements("f | c | a | b | d | e | g | h", ad1.getElements());
+        boolean passed = checkElements("f | c | a | b | d | e | g | h", getElements(ad1));
 
         ad1.addLast("Z");
 
-        passed = checkElements("f | c | a | b | d | e | g | h | Z", ad1.getElements()) && passed;
+        passed = checkElements("f | c | a | b | d | e | g | h | Z", getElements(ad1)) && passed;
 
         ad1.removeLast();
-        passed = checkElements("f | c | a | b | d | e | g | h", ad1.getElements()) && passed;
+        passed = checkElements("f | c | a | b | d | e | g | h", getElements(ad1)) && passed;
 
         printTestStatus(passed);
     }
@@ -175,4 +195,4 @@ public class ArrayDequeTest {
 
         circularDemoTest();
     }
-} 
+}

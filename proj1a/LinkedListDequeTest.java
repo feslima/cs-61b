@@ -3,9 +3,9 @@
  */
 public class LinkedListDequeTest {
     private static class Node<T> {
-        public T item;
-        public Node<T> next;
-        public Node<T> prev;
+        private T item;
+        private Node<T> next;
+        private Node<T> prev;
 
         public Node(T value, Node<T> n, Node<T> p) {
             item = value;
