@@ -1,8 +1,8 @@
 public class LinkedListDeque<T> {
     private static class Node<T> {
-        public T item;
-        public Node<T> next;
-        public Node<T> prev;
+        private T item;
+        private Node<T> next;
+        private Node<T> prev;
 
         public Node(T value, Node<T> n, Node<T> p) {
             item = value;
@@ -116,26 +116,5 @@ public class LinkedListDeque<T> {
             System.out.println(p.item);
             p = p.next;
         }
-    }
-
-    public String getElements() {
-        String elements = "";
-        if (size == 0) {
-            return elements;
-        }
-
-        Node<T> p = sentinel.next;
-        int counter = 0;
-        while (p.item != null) {
-            String delimiter = " | ";
-            if (counter == size - 1) {
-                delimiter = "";
-            }
-            elements = elements + p.item.toString() + delimiter;
-            counter += 1;
-            p = p.next;
-        }
-
-        return elements;
     }
 }
