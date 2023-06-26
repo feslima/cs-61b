@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class ArrayDeque<T> {
     private int size;
     private int nextFirst;
@@ -143,20 +140,24 @@ public class ArrayDeque<T> {
     }
 
     public String getElements() {
+        String elements = "";
         if (size == 0) {
-            return "";
+            return elements;
         }
-        List<String> elements = new ArrayList<>();
 
         int counter = 0;
         int pointer = (nextFirst + 1) % items.length;
         while (counter < size) {
-            elements.add(items[pointer].toString());
+            String delimiter = " | ";
+            if (counter == size - 1) {
+                delimiter = "";
+            }
+            elements = elements + items[pointer].toString() + delimiter;
             counter += 1;
             pointer = (pointer + 1) % items.length;
         }
 
-        return String.join(" | ", elements);
+        return elements;
     }
 
     public void printDeque() {
