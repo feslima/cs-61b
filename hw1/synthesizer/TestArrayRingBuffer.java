@@ -62,21 +62,21 @@ public class TestArrayRingBuffer {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testWhenDequeueingEmptyBuffer_thenRuntimeExceptionIsThrown(){
+    public void testWhenDequeueingEmptyBuffer_thenRuntimeExceptionIsThrown() {
         ArrayRingBuffer<Double> arb = new ArrayRingBuffer<Double>(2);
         assertTrue(arb.isEmpty());
         arb.dequeue();
     }
 
     @Test(expected = RuntimeException.class)
-    public void testWhenPeekiingEmptyBuffer_thenRuntimeExceptionIsThrown(){
+    public void testWhenPeekiingEmptyBuffer_thenRuntimeExceptionIsThrown() {
         ArrayRingBuffer<Double> arb = new ArrayRingBuffer<Double>(2);
         assertTrue(arb.isEmpty());
         arb.peek();
     }
 
     @Test(expected = RuntimeException.class)
-    public void testWhenQueueingFullBuffer_thenRuntimeExceptionIsThrown(){
+    public void testWhenQueueingFullBuffer_thenRuntimeExceptionIsThrown() {
         ArrayRingBuffer<Double> arb = new ArrayRingBuffer<Double>(2);
         assertTrue(arb.isEmpty());
         arb.enqueue(9.3);
