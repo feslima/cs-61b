@@ -27,7 +27,7 @@ public class Palindrome {
         return word.equals(dequeToReversedWord(d));
     }
 
-    public boolean isPalindrome(String word, CharacterComparator cc){
+    public boolean isPalindrome(String word, CharacterComparator cc) {
         int nChars = word.length();
         boolean isEven = nChars % 2 == 0;
 
@@ -37,15 +37,15 @@ public class Palindrome {
 
         boolean result = true;
         for (int i = 0; i < maxIter; i++) {
-           Character start = d.removeFirst();
-           Character end = d.removeLast();
+            Character start = d.removeFirst();
+            Character end = d.removeLast();
 
-           boolean comparison = cc.equalChars(start, end);
+            boolean comparison = cc.equalChars(start, end);
 
-           if (!comparison) {
-               result = false;
-               break;
-           }
+            if (!comparison) {
+                result = false;
+                break;
+            }
         }
 
         return result;
