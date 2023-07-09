@@ -29,7 +29,7 @@ public class PercolationStats {
     private double performExperiment() {
         ArrayList<Integer> sampledSites = new ArrayList<>();
         for (int i = 0; i < N * N; i++) {
-            sampledSites.set(i, i);
+            sampledSites.add(i);
         }
 
         Percolation percolation = pf.make(N);
@@ -75,5 +75,8 @@ public class PercolationStats {
 
     public double confidenceHigh() {
         return mean() + 1.96 * stddev() / Math.sqrt(T);
+    }
+
+    public static void main(String[] args) {
     }
 }
