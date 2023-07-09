@@ -61,7 +61,7 @@ public class Percolation {
     private void appendSiteIfValid(int row, int col, List<Site> siteList) {
         try {
             checkAccess(row, col);
-            siteList.add(new Site(row - 1, col));
+            siteList.add(new Site(row, col));
         } catch (IndexOutOfBoundsException ex) {
         }
     }
