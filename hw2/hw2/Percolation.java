@@ -7,8 +7,8 @@ import java.util.List;
 
 public class Percolation {
     private static class Site {
-        public int x;
-        public int y;
+        private final int x;
+        private final int y;
 
         Site(int x, int y) {
             this.x = x;
@@ -164,18 +164,32 @@ public class Percolation {
         return filledSites;
     }
 
-    /* Does the system percolate? */
-    public boolean percolates() {
-        List<Site> topRow = getTopFilledRow();
-        if (topRow.size() == 0) {
-            return false;
-        }
+    private List<Site> getBottomFilledRow() {
+        ArrayList<Site> filledSites = new ArrayList<>();
 
         int row = gridSize - 1;
         for (int j = 0; j < gridSize; j++) {
-            for (Site site : topRow) {
-                int idxTopSite = xyTo1d(site.x, site.y);
-                if (isFull(row, j) && uf.connected(j, idxTopSite)) {
+            if (isFull(row, j)) {
+                filledSites.add(new Site(row, j));
+            }
+        }
+
+        return filledSites;
+    }
+
+    /* Does the system percolate? */
+    public boolean percolates() {
+        List<Site> topRow = getTopFilledRow();
+        List<Site> bottomRow = getBottomFilledRow();
+        if (topRow.size() == 0 || bottomRow.size() == 0) {
+            return false;
+        }
+
+        for (Site bottomSite : bottomRow) {
+            for (Site topSite : topRow) {
+                int idxTopSite = xyTo1d(topSite.x, topSite.y);
+                int idxBottomSite = xyTo1d(bottomSite.x, bottomSite.y);
+                if (uf.connected(idxTopSite, idxBottomSite)) {
                     return true;
                 }
             }
