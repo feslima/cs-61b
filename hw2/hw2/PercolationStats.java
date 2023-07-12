@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class PercolationStats {
     private final int T;
     private final int N;
-    private final ArrayList<Double> thresholdValues;
+    private final double[] thresholdValues;
     private final PercolationFactory pf;
 
     public PercolationStats(int N, int T, PercolationFactory pf) {
@@ -19,10 +19,10 @@ public class PercolationStats {
         this.N = N;
         this.T = T;
         this.pf = pf;
-        thresholdValues = new ArrayList<>();
+        thresholdValues = new double[T];
 
         for (int i = 0; i < T; i++) {
-            thresholdValues.add(performExperiment());
+            thresholdValues[i] = performExperiment();
         }
     }
 
@@ -54,19 +54,11 @@ public class PercolationStats {
     }
 
     public double mean() {
-        double[] values = new double[thresholdValues.size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = thresholdValues.get(i);
-        }
-        return StdStats.mean(values);
+        return StdStats.mean(thresholdValues);
     }
 
     public double stddev() {
-        double[] values = new double[thresholdValues.size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = thresholdValues.get(i);
-        }
-        return StdStats.stddev(values);
+        return StdStats.stddev(thresholdValues);
     }
 
     public double confidenceLow() {
@@ -78,5 +70,8 @@ public class PercolationStats {
     }
 
     public static void main(String[] args) {
+        PercolationFactory pf = new PercolationFactory();
+        PercolationStats ps = new PercolationStats(50, 40, pf);
+        System.out.println("Mean: " + ps.mean());
     }
 }
