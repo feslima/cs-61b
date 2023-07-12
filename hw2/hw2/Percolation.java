@@ -61,9 +61,10 @@ public class Percolation {
     private void appendSiteIfValid(int row, int col, List<Site> siteList) {
         try {
             checkAccess(row, col);
-            siteList.add(new Site(row, col));
         } catch (IndexOutOfBoundsException ex) {
+            return;
         }
+        siteList.add(new Site(row, col));
     }
 
     private List<Site> getNeighbors(int row, int col) {
@@ -196,9 +197,5 @@ public class Percolation {
         }
 
         return false;
-    }
-
-    public static void main(String[] args) {
-
     }
 }
