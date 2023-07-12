@@ -42,7 +42,7 @@ public class PercolationStats {
             percolation.open(row, col);
         }
 
-        return (double) percolation.numberOfOpenSites() / N;
+        return (double) percolation.numberOfOpenSites() / N * N;
     }
 
     private int getRow(int idx) {
