@@ -79,7 +79,7 @@ public class Percolation {
     }
 
 
-    public void fillOpenSitesIfConnected(int row, int col) {
+    private void fillOpenSitesIfConnected(int row, int col) {
         int index = xyTo1d(row, col);
         for (int i = 0; i < gridSize * gridSize; i++) {
             int cellValue = grid[i];
@@ -103,6 +103,7 @@ public class Percolation {
                 grid[idx] = FULL;
             } else {
                 grid[idx] = EMPTY;
+
             }
 
 
@@ -110,6 +111,13 @@ public class Percolation {
                 if (isOpen(site.x, site.y)) {
                     int idxNeighbor = xyTo1d(site.x, site.y);
                     uf.union(idx, idxNeighbor);
+                }
+            }
+
+            for (Site site: getTopFilledRow()) {
+                if (uf.connected(idx, site.y)) {
+                    grid[idx] = FULL;
+                    break;
                 }
             }
         }
@@ -144,12 +152,12 @@ public class Percolation {
         return filledSites;
     }
 
-    private List<Site> getBottomFilledRow() {
+    private List<Site> getBottomOpenedRow() {
         ArrayList<Site> filledSites = new ArrayList<>();
 
         int row = gridSize - 1;
         for (int j = 0; j < gridSize; j++) {
-            if (isFull(row, j)) {
+            if (isOpen(row, j) && !isFull(row, j)) {
                 filledSites.add(new Site(row, j));
             }
         }
@@ -160,7 +168,7 @@ public class Percolation {
     /* Does the system percolate? */
     public boolean percolates() {
         List<Site> topRow = getTopFilledRow();
-        List<Site> bottomRow = getBottomFilledRow();
+        List<Site> bottomRow = getBottomOpenedRow();
         if (topRow.size() == 0 || bottomRow.size() == 0) {
             return false;
         }
@@ -170,6 +178,7 @@ public class Percolation {
                 int idxTopSite = xyTo1d(topSite.x, topSite.y);
                 int idxBottomSite = xyTo1d(bottomSite.x, bottomSite.y);
                 if (uf.connected(idxTopSite, idxBottomSite)) {
+                    fillOpenSitesIfConnected(topSite.x, topSite.y);
                     return true;
                 }
             }

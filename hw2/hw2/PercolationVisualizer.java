@@ -75,15 +75,12 @@ public class PercolationVisualizer {
             int j = in.readInt();
             perc.open(i, j);
 
-            for (int col = 0; col < N; col++) {
-                if (perc.isFull(0, col)) {
-                    perc.fillOpenSitesIfConnected(0, col);
-                }
-            }
-
             draw(perc, N);
             StdDraw.show(DELAY);
         }
+
+        draw(perc, N);
+        StdDraw.show(DELAY);
     }
 
     public static void main(String[] args) {
