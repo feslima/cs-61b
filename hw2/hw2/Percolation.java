@@ -78,14 +78,28 @@ public class Percolation {
         return neighbors;
     }
 
+    private List<Site> getEmptyNeighbors(int row, int col) {
+        ArrayList<Site> emptyNeighbors = new ArrayList<>();
+
+        for (Site site : getNeighbors(row, col)) {
+            if (isOpen(site.x, site.y) && !isFull(site.x, site.y)) {
+                emptyNeighbors.add(site);
+            }
+        }
+
+        return emptyNeighbors;
+    }
 
     private void fillOpenSitesIfConnected(int row, int col) {
-        int index = xyTo1d(row, col);
-        for (int i = 0; i < gridSize * gridSize; i++) {
-            int cellValue = grid[i];
-            if (index != i && cellValue == EMPTY && uf.connected(index, i)) {
-                grid[i] = FULL;
-            }
+        List<Site> neighbors = getEmptyNeighbors(row, col);
+        if (neighbors.size() == 0) {
+            return;
+        }
+
+        for (Site site : neighbors) {
+            int idx = xyTo1d(site.x, site.y);
+            grid[idx] = FULL;
+            fillOpenSitesIfConnected(site.x, site.y);
         }
     }
 
@@ -110,12 +124,13 @@ public class Percolation {
                 if (isOpen(site.x, site.y)) {
                     int idxNeighbor = xyTo1d(site.x, site.y);
                     uf.union(idx, idxNeighbor);
-                }
-            }
 
-            for (Site site: getTopFilledRow()) {
-                if (uf.connected(idx, site.y) && grid[idx] == EMPTY) {
-                    fillOpenSitesIfConnected(site.x, site.y);
+                    for (int j = 0; j < gridSize; j++) {
+                        if (isFull(0, j) && uf.connected(j, idxNeighbor)) {
+                            grid[idxNeighbor] = FULL;
+                            fillOpenSitesIfConnected(site.x, site.y);
+                        }
+                    }
                 }
             }
         }
@@ -150,12 +165,12 @@ public class Percolation {
         return filledSites;
     }
 
-    private List<Site> getBottomOpenedRow() {
+    private List<Site> getBottomFilledRow() {
         ArrayList<Site> filledSites = new ArrayList<>();
 
         int row = gridSize - 1;
         for (int j = 0; j < gridSize; j++) {
-            if (isOpen(row, j) && !isFull(row, j)) {
+            if (isFull(row, j)) {
                 filledSites.add(new Site(row, j));
             }
         }
@@ -166,7 +181,7 @@ public class Percolation {
     /* Does the system percolate? */
     public boolean percolates() {
         List<Site> topRow = getTopFilledRow();
-        List<Site> bottomRow = getBottomOpenedRow();
+        List<Site> bottomRow = getBottomFilledRow();
         if (topRow.size() == 0 || bottomRow.size() == 0) {
             return false;
         }
