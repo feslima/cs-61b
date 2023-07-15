@@ -103,7 +103,6 @@ public class Percolation {
                 grid[idx] = FULL;
             } else {
                 grid[idx] = EMPTY;
-
             }
 
 
@@ -115,9 +114,8 @@ public class Percolation {
             }
 
             for (Site site: getTopFilledRow()) {
-                if (uf.connected(idx, site.y)) {
-                    grid[idx] = FULL;
-                    break;
+                if (uf.connected(idx, site.y) && grid[idx] == EMPTY) {
+                    fillOpenSitesIfConnected(site.x, site.y);
                 }
             }
         }
@@ -178,7 +176,6 @@ public class Percolation {
                 int idxTopSite = xyTo1d(topSite.x, topSite.y);
                 int idxBottomSite = xyTo1d(bottomSite.x, bottomSite.y);
                 if (uf.connected(idxTopSite, idxBottomSite)) {
-                    fillOpenSitesIfConnected(topSite.x, topSite.y);
                     return true;
                 }
             }
