@@ -5,6 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import lab9.BSTMap;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Tests by Brendan Hu, Spring 2015, revised for 2018 by Josh Hug
  */
@@ -84,6 +88,126 @@ public class TestBSTMap {
         b.put("hi", 1);
         assertTrue(b.containsKey("hi"));
         assertTrue(b.get("hi") != null);
+    }
+
+    @Test
+    public void testShouldRemoveLeftLeafWithoutChildCorrectly() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(50, 50);
+        b.put(25, 25);
+        b.put(75, 75);
+        b.put(10, 10);
+        b.put(33, 33);
+        b.put(56, 56);
+        b.put(89, 89);
+
+        b.remove(10);
+        assertEquals(b.size(), 6);
+        assertFalse(b.containsKey(10));
+
+        Set<Integer> expected = new HashSet<>(Arrays.asList(25, 33, 50, 56, 75, 89));
+        assertEquals(b.keySet(), expected);
+    }
+
+    @Test
+    public void testShouldRemoveNodeWithSingleRightChildCorrectly() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(50, 50);
+        b.put(25, 25);
+        b.put(75, 75);
+        b.put(10, 10);
+        b.put(33, 33);
+        b.put(56, 56);
+        b.put(89, 89);
+
+        b.remove(10);
+        assertEquals(b.size(), 6);
+        assertFalse(b.containsKey(10));
+
+        Set<Integer> expected = new HashSet<>(Arrays.asList(25, 33, 50, 56, 75, 89));
+        assertEquals(b.keySet(), expected);
+
+        b.remove(25);
+        assertEquals(b.size(), 5);
+        assertFalse(b.containsKey(25));
+
+        expected = new HashSet<>(Arrays.asList(33, 50, 56, 75, 89));
+        assertEquals(b.keySet(), expected);
+    }
+
+    @Test
+    public void testShouldRemoveNodeWithTwoChildrenCorrectly() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(50, 50);
+        b.put(25, 25);
+        b.put(75, 75);
+        b.put(11, 11);
+        b.put(33, 33);
+        b.put(56, 56);
+        b.put(89, 89);
+        b.put(30, 30);
+        b.put(40, 40);
+        b.put(52, 52);
+        b.put(61, 61);
+        b.put(82, 82);
+        b.put(95, 95);
+
+
+        b.remove(56);
+        assertEquals(b.size(), 12);
+        assertFalse(b.containsKey(56));
+
+        Set<Integer> expected = new HashSet<>(Arrays.asList(11, 25, 30, 33, 40, 50, 52, 61, 75, 82, 89, 95));
+        assertEquals(b.keySet(), expected);
+    }
+
+    @Test
+    public void testShouldRemoveNodeWithTwoChildrenAndLeftSuccessorNodeCorrectly() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(50, 50);
+        b.put(25, 25);
+        b.put(75, 75);
+        b.put(11, 11);
+        b.put(33, 33);
+        b.put(61, 61);
+        b.put(89, 89);
+        b.put(30, 30);
+        b.put(40, 40);
+        b.put(52, 52);
+        b.put(82, 82);
+        b.put(95, 95);
+
+        b.remove(50);
+        assertEquals(b.size(), 11);
+        assertFalse(b.containsKey(50));
+
+        Set<Integer> expected = new HashSet<>(Arrays.asList(11, 25, 30, 33, 40, 52, 61, 75, 82, 89, 95));
+        assertEquals(b.keySet(), expected);
+    }
+
+    @Test
+    public void testShouldRemoveNodeWithTwoChildrenAndSuccessorNodeWithRightChildCorrectly() {
+        BSTMap<Integer, Integer> b = new BSTMap<Integer, Integer>();
+        b.put(50, 50);
+        b.put(25, 25);
+        b.put(75, 75);
+        b.put(11, 11);
+        b.put(33, 33);
+        b.put(61, 61);
+        b.put(89, 89);
+        b.put(30, 30);
+        b.put(40, 40);
+        b.put(52, 52);
+        b.put(82, 82);
+        b.put(95, 95);
+        b.put(55, 55);
+
+        b.remove(50);
+        assertEquals(b.size(), 12);
+        assertFalse(b.containsKey(50));
+
+        Set<Integer> expected = new HashSet<>(Arrays.asList(11, 25, 30, 33, 40, 52, 55, 61, 75, 82, 89, 95));
+        assertEquals(b.keySet(), expected);
     }
 
     public static void main(String[] args) {
