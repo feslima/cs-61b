@@ -14,8 +14,25 @@ public class SimpleOomage implements Oomage {
 
     @Override
     public boolean equals(Object o) {
-        // TODO: Write this method.
-        return false;
+        if (this == o) {
+            // are the references equal?
+            return true;
+        }
+
+        if (o == null) {
+            // is the other object null?
+            return false;
+        }
+
+        if (o.getClass() != this.getClass()){
+            // the classes of the objects are different
+            return false;
+        }
+
+        boolean isSameRed = this.red == ((SimpleOomage) o).red;
+        boolean isSameGreen = this.green == ((SimpleOomage) o).green;
+        boolean isSameBlue = this.blue == ((SimpleOomage) o).blue;
+        return isSameRed && isSameGreen && isSameBlue;
     }
 
     /* Uncomment this method after you've written
