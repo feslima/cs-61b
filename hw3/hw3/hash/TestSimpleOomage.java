@@ -13,10 +13,10 @@ import static org.junit.Assert.*;
 public class TestSimpleOomage {
 
     private static class OomageWithColor {
-        public int red;
-        public int green;
-        public int blue;
-        public Oomage oomage;
+        private final int red;
+        private final int green;
+        private final int blue;
+        private final Oomage oomage;
 
         public OomageWithColor(Oomage o, int red, int green, int blue) {
             this.oomage = o;

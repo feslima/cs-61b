@@ -48,10 +48,11 @@ public class SimpleOomage implements Oomage {
              * 00000000 00000000 00000000
              * red      green    blue
              *
-             * To achieve this mask, we simply need to shift the red color 16 bits to the left, and the green
-             * color 8 bits to the left.
-             * Dividing each color by 5, we normalize each color multiplier to an integer factor that increments by 1,
-             * because the color input requirement being values multiples of 5.
+             * To achieve this mask, we simply need to shift the red color 16 bits to the left,
+             * and the green color 8 bits to the left.
+             * Dividing each color by 5, we normalize each color multiplier to an integer factor
+             * that increments by 1, because the color input requirement being values multiples
+             * of 5.
              * */
             return red / 5 * (2 << 16) + green / 5 * (2 << 8) + blue / 5;
         }
