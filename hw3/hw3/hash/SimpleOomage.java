@@ -42,7 +42,15 @@ public class SimpleOomage implements Oomage {
         if (!USE_PERFECT_HASH) {
             return red + green + blue;
         } else {
-            return 0;
+            /* Since each color ranges from 0 to 255, this mean that each one can be represented
+             * as 8-bit number. Thus, to represent the Oomage as whole, we can use a bit mask of
+             * 24 bits to represent this Oomage hash. For example:
+             * 00000000 00000000 00000000
+             * red      green    blue
+             *
+             * To achieve this mask, we simply need to shift the red color 16 bits to the left, and the green
+             * color 8 bits to the left.*/
+            return red * (2 << 16) + green * (2 << 8) + blue;
         }
     }
 
