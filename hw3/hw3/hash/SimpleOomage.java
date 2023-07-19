@@ -1,5 +1,7 @@
 package hw3.hash;
+
 import java.awt.Color;
+
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdDraw;
 
@@ -10,26 +12,51 @@ public class SimpleOomage implements Oomage {
     protected int blue;
 
     private static final double WIDTH = 0.01;
-    private static final boolean USE_PERFECT_HASH = false;
+    private static final boolean USE_PERFECT_HASH = true;
 
     @Override
     public boolean equals(Object o) {
-        // TODO: Write this method.
-        return false;
+        if (this == o) {
+            // are the references equal?
+            return true;
+        }
+
+        if (o == null) {
+            // is the other object null?
+            return false;
+        }
+
+        if (o.getClass() != this.getClass()) {
+            // the classes of the objects are different
+            return false;
+        }
+
+        boolean isSameRed = this.red == ((SimpleOomage) o).red;
+        boolean isSameGreen = this.green == ((SimpleOomage) o).green;
+        boolean isSameBlue = this.blue == ((SimpleOomage) o).blue;
+        return isSameRed && isSameGreen && isSameBlue;
     }
 
-    /* Uncomment this method after you've written
-       equals and failed the testHashCodeAndEqualsConsistency
-       test.
     @Override
     public int hashCode() {
         if (!USE_PERFECT_HASH) {
             return red + green + blue;
         } else {
-            // TODO: Write a perfect hash function for Simple Oomages.
-            return 0;
+            /* Since each color ranges from 0 to 255, this mean that each one can be represented
+             * as 8-bit number. Thus, to represent the Oomage as whole, we can use a bit mask of
+             * 24 bits to represent this Oomage hash. For example:
+             * 00000000 00000000 00000000
+             * red      green    blue
+             *
+             * To achieve this mask, we simply need to shift the red color 16 bits to the left,
+             * and the green color 8 bits to the left.
+             * Dividing each color by 5, we normalize each color multiplier to an integer factor
+             * that increments by 1, because the color input requirement being values multiples
+             * of 5.
+             * */
+            return red / 5 * (2 << 16) + green / 5 * (2 << 8) + blue / 5;
         }
-    }*/
+    }
 
     public SimpleOomage(int r, int g, int b) {
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
