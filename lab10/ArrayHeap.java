@@ -223,7 +223,15 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     @Override
     public void changePriority(T item, double priority) {
-        /* TODO: Your code here! */
+        for (int i = 1; i < contents.length; i++) {
+            Node node = contents[i];
+            if (node != null && node.item().equals(item)) {
+                node.myPriority = priority; // change priority
+                swap(1, i); // promote the changed node to root
+                sink(1); // sink the root to make the heap correct
+                break;
+            }
+        }
         return;
     }
 
@@ -281,7 +289,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
             myPriority = priority;
         }
 
-        public T item(){
+        public T item() {
             return myItem;
         }
 
@@ -296,7 +304,9 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     }
 
 
-    /** Helper function to resize the backing array when necessary. */
+    /**
+     * Helper function to resize the backing array when necessary.
+     */
     private void resize(int capacity) {
         Node[] temp = new ArrayHeap.Node[capacity];
         for (int i = 1; i < this.contents.length; i++) {
