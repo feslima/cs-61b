@@ -1,4 +1,5 @@
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -124,13 +125,25 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         validateSinkSwimArg(index);
 
         Node current = getNode(index);
-        Node left = getNode(leftIndex(index));
-        while (current != null && left != null && current.priority() > left.priority()) {
-            swap(leftIndex(index), index);
-            index = leftIndex(index);
+        while (current != null) {
+            Node left = getNode(leftIndex(index));
+            Node right = getNode(rightIndex(index));
 
-            current = getNode(index);
-            left = getNode(leftIndex(index));
+            if (left != null || right != null) {
+                int lowestPrioIndex = min(leftIndex(index), rightIndex(index));
+
+                Node lowestPrio = getNode(lowestPrioIndex);
+                if (lowestPrio != null) {
+                    if (current.priority() <= lowestPrio.priority()) {
+                        break;
+                    }
+                    swap(lowestPrioIndex, index);
+                    index = lowestPrioIndex;
+                    current = getNode(index);
+                }
+            } else {
+                break;
+            }
         }
         return;
     }
