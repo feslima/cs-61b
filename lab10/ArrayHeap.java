@@ -123,7 +123,15 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         // Throws an exception if index is invalid. DON'T CHANGE THIS LINE.
         validateSinkSwimArg(index);
 
-        /** TODO: Your code here. */
+        Node current = getNode(index);
+        Node left = getNode(leftIndex(index));
+        while (current != null && left != null && current.priority() > left.priority()) {
+            swap(leftIndex(index), index);
+            index = leftIndex(index);
+
+            current = getNode(index);
+            left = getNode(leftIndex(index));
+        }
         return;
     }
 
@@ -138,7 +146,11 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
             resize(contents.length * 2);
         }
 
-        /* TODO: Your code here! */
+        Node newNode = new Node(item, priority);
+        size += 1;
+        int lastIndex = size;
+        contents[lastIndex] = newNode;
+        swim(lastIndex);
     }
 
     /**
