@@ -199,8 +199,11 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         contents[size] = null; // remove from heap
         size -= 1;
 
-        sink(1);
+        if (size == 0) {
+            return value;
+        }
 
+        sink(1);
         return value;
     }
 
