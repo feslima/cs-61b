@@ -2,6 +2,9 @@ package hw4.puzzle;
 
 import edu.princeton.cs.algs4.Queue;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class Board implements WorldState {
     private final int BLANK = 0;
     private final int[] tiles;
@@ -147,6 +150,13 @@ public class Board implements WorldState {
 
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(size);
+        result = 31 * result + Arrays.hashCode(tiles);
+        return result;
     }
 
     /**

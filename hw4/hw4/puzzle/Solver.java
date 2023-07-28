@@ -4,6 +4,7 @@ import edu.princeton.cs.algs4.MinPQ;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 
 public class Solver {
 
@@ -18,11 +19,11 @@ public class Solver {
     }
 
     private static class SearchNode {
-        public WorldState state;
-        public int moves;
-        public SearchNode previous;
+        private final WorldState state;
+        private final int moves;
+        private final SearchNode previous;
 
-        public int distance;
+        private final int distance;
 
         public SearchNode(WorldState state, int moves, SearchNode previous) {
             this.state = state;
@@ -98,5 +99,18 @@ public class Solver {
 
     public Iterable<WorldState> solution() {
         return paths;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Solver solver = (Solver) o;
+        return moves == solver.moves && Objects.equals(paths, solver.paths);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths, moves);
     }
 }
