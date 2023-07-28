@@ -85,6 +85,8 @@ public class Solver {
             p = p.previous;
         }
 
+        reversedPaths.add(p.state); // paths must account for initial state
+
         for (int i = reversedPaths.size() - 1; i >= 0; i--) {
             paths.add(reversedPaths.get(i));
         }
