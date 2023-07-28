@@ -83,8 +83,7 @@ public class TestSolver {
         }
     }
 
- /* Uncomment everything in this block once you've written Board.
-     public static Board readBoard(String filename) {
+    public static Board readBoard(String filename) {
         In in = new In(filename);
         int N = in.readInt();
         int[][] tiles = new int[N][N];
@@ -147,5 +146,5 @@ public class TestSolver {
             Solver s = new Solver(b);
             assertEquals("Wrong number of moves on " + puzzleName, bps.numMoves, s.moves());
         }
-    }*/
+    }
 }
