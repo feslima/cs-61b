@@ -62,7 +62,17 @@ public class GraphDB {
      * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        // TODO: Your code here.
+        ArrayList<Long> nodeIdsToRemove = new ArrayList<>();
+        for (long id : nodes.keySet()) {
+            Node node = nodes.get(id);
+            if (node.getNeighbors().isEmpty()) {
+                nodeIdsToRemove.add(id);
+            }
+        }
+
+        for (long id : nodeIdsToRemove) {
+            nodes.remove(id);
+        }
     }
 
     /**
@@ -222,7 +232,7 @@ public class GraphDB {
             neighbors.put(v, wayInfo);
         }
 
-        public Iterable<Long> getNeighbors() {
+        public Set<Long> getNeighbors() {
             return neighbors.keySet();
         }
     }
