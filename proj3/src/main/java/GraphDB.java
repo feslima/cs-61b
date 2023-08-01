@@ -1,3 +1,4 @@
+import example.CSCourseDB;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -6,7 +7,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -18,12 +19,15 @@ import java.util.ArrayList;
  * @author Alan Yao, Josh Hug
  */
 public class GraphDB {
+
+    private final Map<Long, Node> nodes = new LinkedHashMap<>();
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
 
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
+     *
      * @param dbPath Path to the XML file to be parsed.
      */
     public GraphDB(String dbPath) {
@@ -44,6 +48,7 @@ public class GraphDB {
 
     /**
      * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
+     *
      * @param s Input string.
      * @return Cleaned string.
      */
@@ -52,9 +57,9 @@ public class GraphDB {
     }
 
     /**
-     *  Remove nodes with no connections from the graph.
-     *  While this does not guarantee that any two nodes in the remaining graph are connected,
-     *  we can reasonably assume this since typically roads are connected.
+     * Remove nodes with no connections from the graph.
+     * While this does not guarantee that any two nodes in the remaining graph are connected,
+     * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
         // TODO: Your code here.
@@ -62,26 +67,33 @@ public class GraphDB {
 
     /**
      * Returns an iterable of all vertex IDs in the graph.
+     *
      * @return An iterable of id's of all vertices in the graph.
      */
     Iterable<Long> vertices() {
-        //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+        return nodes.keySet();
     }
 
     /**
      * Returns ids of all vertices adjacent to v.
+     *
      * @param v The id of the vertex we are looking adjacent to.
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        Node node = nodes.get(v);
+        if (node == null) {
+            return null;
+        }
+
+        return node.getNeighbors();
     }
 
     /**
      * Returns the great-circle distance between vertices v and w in miles.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The great-circle distance between the two locations from the graph.
@@ -109,6 +121,7 @@ public class GraphDB {
      * end point.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The initial bearing between the vertices.
@@ -131,29 +144,104 @@ public class GraphDB {
 
     /**
      * Returns the vertex closest to the given longitude and latitude.
+     *
      * @param lon The target longitude.
      * @param lat The target latitude.
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        // uses a priority queue with each node computed distance to target
+        PriorityQueue<NodeWithDistance> pq = new PriorityQueue<>();
+        for (Long vertex : vertices()) {
+            pq.add(NodeWithDistance.fromNode(nodes.get(vertex), lat, lon));
+        }
+
+        NodeWithDistance closest = pq.poll();
+        return closest != null ? closest.getId() : -1;
     }
 
     /**
      * Gets the longitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return nodes.get(v).longitude;
     }
 
     /**
      * Gets the latitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return nodes.get(v).latitude;
     }
+
+    public void addNode(Node node) {
+        nodes.put(node.id, node);
+    }
+
+    public void connectNodes(long from, long to, HashMap<String, String> extraInfo) {
+        Node fromNode = nodes.get(from);
+        Node toNode = nodes.get(to);
+        if (fromNode == null || toNode == null) {
+            throw new IllegalArgumentException("Either or both to and from nodes doesn't exist.");
+        }
+        fromNode.connectTo(to, extraInfo);
+        toNode.connectTo(from, extraInfo);
+    }
+
+    public void connectNodes(long from, long to) {
+        HashMap<String, String> wayInfo = new HashMap<>();
+        connectNodes(from, to, wayInfo);
+    }
+
+    static class Node {
+        private final long id;
+        private final double latitude;
+        private final double longitude;
+        private final HashMap<Long, HashMap<String, String>> neighbors = new HashMap<>();
+
+        Node(long id, double latitude, double longitude) {
+            this.id = id;
+            this.latitude = latitude;
+            this.longitude = longitude;
+
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public void connectTo(long v, HashMap<String, String> wayExtraInfo) {
+            HashMap<String, String> wayInfo = neighbors.containsKey(v) ? neighbors.get(v) : new HashMap<>();
+            wayInfo.putAll(wayExtraInfo);
+            neighbors.put(v, wayInfo);
+        }
+
+        public Iterable<Long> getNeighbors() {
+            return neighbors.keySet();
+        }
+    }
+
+    static class NodeWithDistance extends Node implements Comparable<NodeWithDistance> {
+        private final double distance;
+        NodeWithDistance(long id, double latitude, double longitude, double lat, double lon) {
+            super(id, latitude, longitude);
+            this.distance = GraphDB.distance(longitude, latitude, lon, lat);
+        }
+
+        static NodeWithDistance fromNode(Node node, double targetLat, double targetLon) {
+            return new NodeWithDistance(node.id, node.latitude, node.longitude, targetLat, targetLon);
+        }
+
+        @Override
+        public int compareTo(NodeWithDistance o) {
+            return Double.compare(distance, o.distance);
+        }
+    }
+
 }
