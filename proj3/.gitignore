@@ -2,4 +2,3 @@ img/
 target/
 *.png
 !tiny-clean.osm.xml
-!berkeley-2018-small.osm.xml
