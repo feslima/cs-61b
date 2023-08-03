@@ -81,7 +81,9 @@ public class Rasterer {
         String[][] grid = new String[yRasterLrlat - yRasterUllat][xRasterLrlon - xRasterUllon];
         for (int y = yRasterUllat; y < yRasterLrlat; y++) {
             for (int x = xRasterUllon; x < xRasterLrlon; x++) {
-                grid[y - yRasterUllat][x - xRasterUllon] = "d" + imageDepth + "_x" + x + "_y" + y + ".png";
+                int j = y - yRasterUllat;
+                int i = x - xRasterUllon;
+                grid[j][i] = "d" + imageDepth + "_x" + x + "_y" + y + ".png";
             }
         }
 
