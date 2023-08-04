@@ -235,10 +235,45 @@ public class GraphDB {
         public Set<Long> getNeighbors() {
             return neighbors.keySet();
         }
+
+        public double distanceToCoord(double lon, double lat) {
+            return distance(longitude, latitude, lon, lat);
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "id=" + id +
+                    ", longitude=" + longitude +
+                    ", latitude=" + latitude +
+                    '}';
+        }
+    }
+
+    static class NodeComparator implements Comparator<Node> {
+        private double longitude;
+        private double latitude;
+        private Map<Long, Double> gScore;
+        private Map<Long, Double> hScore;
+
+        NodeComparator(double targetLon, double targetLat, Map<Long, Double> gScore, Map<Long, Double> hScore) {
+            longitude = targetLon;
+            latitude = targetLat;
+            this.gScore = gScore;
+            this.hScore = hScore;
+        }
+
+        @Override
+        public int compare(Node o1, Node o2) {
+            double d1 = gScore.get(o1.getId()) + hScore.get(o1.getId());
+            double d2 = gScore.get(o2.getId()) + hScore.get(o2.getId());
+            return Double.compare(d1, d2);
+        }
     }
 
     static class NodeWithDistance extends Node implements Comparable<NodeWithDistance> {
         private final double distance;
+
         NodeWithDistance(long id, double latitude, double longitude, double lat, double lon) {
             super(id, latitude, longitude);
             this.distance = GraphDB.distance(longitude, latitude, lon, lat);
