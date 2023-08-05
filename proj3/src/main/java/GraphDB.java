@@ -200,6 +200,10 @@ public class GraphDB {
         nodes.put(node.id, node);
     }
 
+    public Node getNode(long id) {
+        return nodes.get(id);
+    }
+
     public void connectNodes(long from, long to, HashMap<String, String> extraInfo) {
         Node fromNode = nodes.get(from);
         Node toNode = nodes.get(to);
@@ -212,6 +216,7 @@ public class GraphDB {
 
     static class Node {
         private final long id;
+        private String name;
         private final double latitude;
         private final double longitude;
         private final HashMap<Long, HashMap<String, String>> neighbors = new HashMap<>();
@@ -220,7 +225,16 @@ public class GraphDB {
             this.id = id;
             this.latitude = latitude;
             this.longitude = longitude;
+            this.name = null;
 
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
         }
 
         public long getId() {
