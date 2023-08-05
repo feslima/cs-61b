@@ -1,3 +1,4 @@
 img/
 target/
 *.png
+!tiny-clean.osm.xml

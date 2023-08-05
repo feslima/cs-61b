@@ -3,10 +3,17 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.Objects;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.ArrayList;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge) information.
@@ -18,12 +25,15 @@ import java.util.ArrayList;
  * @author Alan Yao, Josh Hug
  */
 public class GraphDB {
+
+    private final Map<Long, Node> nodes = new LinkedHashMap<>();
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
 
     /**
      * Example constructor shows how to create and start an XML parser.
      * You do not need to modify this constructor, but you're welcome to do so.
+     *
      * @param dbPath Path to the XML file to be parsed.
      */
     public GraphDB(String dbPath) {
@@ -44,6 +54,7 @@ public class GraphDB {
 
     /**
      * Helper to process strings into their "cleaned" form, ignoring punctuation and capitalization.
+     *
      * @param s Input string.
      * @return Cleaned string.
      */
@@ -52,36 +63,53 @@ public class GraphDB {
     }
 
     /**
-     *  Remove nodes with no connections from the graph.
-     *  While this does not guarantee that any two nodes in the remaining graph are connected,
-     *  we can reasonably assume this since typically roads are connected.
+     * Remove nodes with no connections from the graph.
+     * While this does not guarantee that any two nodes in the remaining graph are connected,
+     * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        // TODO: Your code here.
+        ArrayList<Long> nodeIdsToRemove = new ArrayList<>();
+        for (long id : nodes.keySet()) {
+            Node node = nodes.get(id);
+            if (node.getNeighbors().isEmpty()) {
+                nodeIdsToRemove.add(id);
+            }
+        }
+
+        for (long id : nodeIdsToRemove) {
+            nodes.remove(id);
+        }
     }
 
     /**
      * Returns an iterable of all vertex IDs in the graph.
+     *
      * @return An iterable of id's of all vertices in the graph.
      */
     Iterable<Long> vertices() {
-        //YOUR CODE HERE, this currently returns only an empty list.
-        return new ArrayList<Long>();
+        return nodes.keySet();
     }
 
     /**
      * Returns ids of all vertices adjacent to v.
+     *
      * @param v The id of the vertex we are looking adjacent to.
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        return null;
+        Node node = nodes.get(v);
+        if (node == null) {
+            return null;
+        }
+
+        return node.getNeighbors();
     }
 
     /**
      * Returns the great-circle distance between vertices v and w in miles.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The great-circle distance between the two locations from the graph.
@@ -109,6 +137,7 @@ public class GraphDB {
      * end point.
      * Assumes the lon/lat methods are implemented properly.
      * <a href="https://www.movable-type.co.uk/scripts/latlong.html">Source</a>.
+     *
      * @param v The id of the first vertex.
      * @param w The id of the second vertex.
      * @return The initial bearing between the vertices.
@@ -131,29 +160,166 @@ public class GraphDB {
 
     /**
      * Returns the vertex closest to the given longitude and latitude.
+     *
      * @param lon The target longitude.
      * @param lat The target latitude.
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        return 0;
+        // uses a priority queue with each node computed distance to target
+        PriorityQueue<NodeWithDistance> pq = new PriorityQueue<>();
+        for (Long vertex : vertices()) {
+            pq.add(NodeWithDistance.fromNode(nodes.get(vertex), lon, lat));
+        }
+
+        NodeWithDistance closest = pq.poll();
+        return closest != null ? closest.getId() : -1;
     }
 
     /**
      * Gets the longitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The longitude of the vertex.
      */
     double lon(long v) {
-        return 0;
+        return nodes.get(v).longitude;
     }
 
     /**
      * Gets the latitude of a vertex.
+     *
      * @param v The id of the vertex.
      * @return The latitude of the vertex.
      */
     double lat(long v) {
-        return 0;
+        return nodes.get(v).latitude;
     }
+
+    public void addNode(Node node) {
+        nodes.put(node.id, node);
+    }
+
+    public Node getNode(long id) {
+        return nodes.get(id);
+    }
+
+    public void connectNodes(long from, long to, HashMap<String, String> extraInfo) {
+        Node fromNode = nodes.get(from);
+        Node toNode = nodes.get(to);
+        if (fromNode == null || toNode == null) {
+            throw new IllegalArgumentException("Either or both to and from nodes doesn't exist.");
+        }
+        fromNode.connectTo(to, extraInfo);
+        toNode.connectTo(from, extraInfo);
+    }
+
+    static class Node {
+        private final long id;
+        private String name;
+        private final double latitude;
+        private final double longitude;
+        private final HashMap<Long, HashMap<String, String>> neighbors = new HashMap<>();
+
+        Node(long id, double longitude, double latitude) {
+            this.id = id;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.name = null;
+
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public void connectTo(long v, HashMap<String, String> wayExtraInfo) {
+            HashMap<String, String> wayInfo = neighbors.containsKey(v) ? neighbors.get(v) : new HashMap<>();
+            wayInfo.putAll(wayExtraInfo);
+            neighbors.put(v, wayInfo);
+        }
+
+        public Set<Long> getNeighbors() {
+            return neighbors.keySet();
+        }
+
+        public double distanceToCoord(double lon, double lat) {
+            return distance(longitude, latitude, lon, lat);
+        }
+
+        @Override
+        public String toString() {
+            return "Node{"
+                    + "id=" + id
+                    + ", longitude=" + longitude
+                    + ", latitude=" + latitude
+                    + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return id == node.id && Double.compare(latitude, node.latitude) == 0 && Double.compare(longitude, node.longitude) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, latitude, longitude);
+        }
+    }
+
+    /**
+     * Computes the A* f(n) function score of nodes given their mappings. Intended use in min-heaps.
+     */
+    static class NodeScoreComparator implements Comparator<Long> {
+        private final Map<Long, Double> gScore;
+        private final Map<Long, Double> hScore;
+
+        /**
+         * @param gScore g(n) function mapping of node ids to their g values.
+         *               g(n) corresponds to computed distances from start to node n.
+         * @param hScore h(n) function mapping of node ids to their h values.
+         *               h(n) corresponds to computed distances from node n to target.
+         */
+        NodeScoreComparator(Map<Long, Double> gScore, Map<Long, Double> hScore) {
+            this.gScore = gScore;
+            this.hScore = hScore;
+        }
+
+        @Override
+        public int compare(Long o1, Long o2) {
+            double d1 = gScore.getOrDefault(o1, Double.POSITIVE_INFINITY) + hScore.getOrDefault(o1, Double.POSITIVE_INFINITY);
+            double d2 = gScore.getOrDefault(o2, Double.POSITIVE_INFINITY) + hScore.getOrDefault(o2, Double.POSITIVE_INFINITY);
+            return Double.compare(d1, d2);
+        }
+    }
+
+    static class NodeWithDistance extends Node implements Comparable<NodeWithDistance> {
+        private final double distance;
+
+        NodeWithDistance(long id, double longitude, double latitude, double lon, double lat) {
+            super(id, longitude, latitude);
+            this.distance = GraphDB.distance(longitude, latitude, lon, lat);
+        }
+
+        static NodeWithDistance fromNode(Node node, double targetLon, double targetLat) {
+            return new NodeWithDistance(node.id, node.longitude, node.latitude, targetLon, targetLat);
+        }
+
+        @Override
+        public int compareTo(NodeWithDistance o) {
+            return Double.compare(distance, o.distance);
+        }
+    }
+
 }
