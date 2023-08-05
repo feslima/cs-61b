@@ -257,10 +257,19 @@ public class GraphDB {
         }
     }
 
+    /**
+     * Computes the A* f(n) function score of nodes given their mappings. Intended use in min-heaps.
+     */
     static class NodeScoreComparator implements Comparator<Long> {
         private final Map<Long, Double> gScore;
         private final Map<Long, Double> hScore;
 
+        /**
+         * @param gScore g(n) function mapping of node ids to their g values.
+         *               g(n) corresponds to computed distances from start to node n.
+         * @param hScore h(n) function mapping of node ids to their h values.
+         *               h(n) corresponds to computed distances from node n to target.
+         */
         NodeScoreComparator(Map<Long, Double> gScore, Map<Long, Double> hScore) {
             this.gScore = gScore;
             this.hScore = hScore;
