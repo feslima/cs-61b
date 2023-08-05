@@ -29,43 +29,57 @@ public class Router {
         Map<Long, Double> gScore = new HashMap<>();
         Map<Long, Double> hScore = new HashMap<>();
 
-        GraphDB.NodeComparator nc = new GraphDB.NodeComparator(destlon, destlat, gScore, hScore);
-        PriorityQueue<GraphDB.Node> pq = new PriorityQueue<>(nc);
+        GraphDB.NodeScoreComparator nc = new GraphDB.NodeScoreComparator(gScore, hScore);
+        PriorityQueue<Long> pq = new PriorityQueue<>(nc);
 
-        GraphDB.Node currentNode = new GraphDB.Node(g.closest(stlon, stlat), stlat, stlon);
+        GraphDB.Node currentNode = new GraphDB.Node(g.closest(stlon, stlat), stlon, stlat);
         double startToCurrentDistance = currentNode.distanceToCoord(stlon, stlat);
         double currentToTargetDistance = currentNode.distanceToCoord(destlon, destlat);
 
-        pq.add(currentNode);
+        long targetNodeId = g.closest(destlon, destlat);
+        double targetNodeLon = g.lon(targetNodeId);
+        double targetNodeLat = g.lat(targetNodeId);
+
+        pq.add(currentNode.getId());
 
         gScore.put(currentNode.getId(), startToCurrentDistance);
         hScore.put(currentNode.getId(), currentToTargetDistance);
 
+        boolean success = false;
         while (!pq.isEmpty()) {
-            currentNode = pq.poll();
+            long currentId = pq.poll();
+            currentNode = new GraphDB.Node(currentId, g.lon(currentId), g.lat(currentId));
 
-            if (currentNode.distanceToCoord(destlon, destlat) <= 1e-6) {
+            if (currentNode.distanceToCoord(targetNodeLon, targetNodeLat) <= 1e-6) {
+                success = true;
                 break;
             }
 
-            for (long neighbor : g.adjacent(currentNode.getId())) {
-                double currentDistanceToNeighbor = currentNode.distanceToCoord(g.lon(neighbor), g.lat(neighbor));
-                startToCurrentDistance = gScore.get(currentNode.getId()) + currentDistanceToNeighbor;
+            for (long neighbor : g.adjacent(currentId)) {
+                double lonNeighbor = g.lon(neighbor);
+                double latNeighbor = g.lat(neighbor);
+                double currentDistanceToNeighbor = currentNode.distanceToCoord(lonNeighbor, latNeighbor);
 
-                if (!gScore.containsKey(neighbor) || startToCurrentDistance < gScore.get(neighbor)) {
+                startToCurrentDistance = gScore.get(currentId) + currentDistanceToNeighbor;
+
+                if (startToCurrentDistance < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
                     // found a better path (or it's an uncharted/undiscovered node)
+                    GraphDB.Node neighborNode = new GraphDB.Node(neighbor, lonNeighbor, latNeighbor);
+
                     gScore.put(neighbor, startToCurrentDistance);
-                    hScore.put(neighbor, currentNode.distanceToCoord(destlon, destlat));
-                    cameFrom.put(neighbor, currentNode.getId());
+                    hScore.put(neighbor, neighborNode.distanceToCoord(destlon, destlat));
+                    cameFrom.put(neighbor, currentId);
 
-                    GraphDB.Node neighborNode = new GraphDB.Node(neighbor, g.lat(neighbor), g.lon(neighbor));
-
-                    if (!pq.contains(neighborNode)) {
-                        pq.add(neighborNode);
+                    if (!pq.contains(neighbor)) {
+                        pq.add(neighbor);
                     }
                 }
             }
 
+        }
+
+        if (!success) {
+            return new ArrayList<>();
         }
 
         return getSolution(currentNode.getId(), cameFrom);
@@ -82,7 +96,8 @@ public class Router {
         ArrayList<Long> paths = new ArrayList<>();
 
         for (int i = reversedPaths.size() - 1; i >= 0; i--) {
-            paths.add(reversedPaths.get(i));
+            long id = reversedPaths.get(i);
+            paths.add(id);
         }
 
         return paths;
