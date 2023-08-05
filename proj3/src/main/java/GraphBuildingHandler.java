@@ -2,7 +2,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 
 /**
  * Parses OSM XML files using an XML SAX parser. Used to construct the graph of roads for
@@ -37,6 +42,7 @@ public class GraphBuildingHandler extends DefaultHandler {
     private String activeState = "";
     private final GraphDB g;
     private Long lastWayId;
+    private Long lastNodeId;
     private final HashMap<Long, WayEdge> ways = new HashMap<>();
 
     /**
@@ -46,6 +52,7 @@ public class GraphBuildingHandler extends DefaultHandler {
      */
     public GraphBuildingHandler(GraphDB g) {
         this.g = g;
+        lastNodeId = null;
         lastWayId = null;
     }
 
@@ -53,12 +60,12 @@ public class GraphBuildingHandler extends DefaultHandler {
      * Called at the beginning of an element. Typically, you will want to handle each element in
      * here, and you may want to track the parent element.
      *
-     * @param uri        The Namespace URI, or the empty string if the element has no Namespace URI or
-     *                   if Namespace processing is not being performed.
+     * @param uri        The Namespace URI, or the empty string if the element has no Namespace URI
+     *                   or if Namespace processing is not being performed.
      * @param localName  The local name (without prefix), or the empty string if Namespace
      *                   processing is not being performed.
-     * @param qName      The qualified name (with prefix), or the empty string if qualified names are
-     *                   not available. This tells us which element we're looking at.
+     * @param qName      The qualified name (with prefix), or the empty string if qualified names
+     *                   are not available. This tells us which element we're looking at.
      * @param attributes The attributes attached to the element. If there are no attributes, it
      *                   shall be an empty Attributes object.
      * @throws SAXException Any SAX exception, possibly wrapping another exception.
@@ -76,6 +83,7 @@ public class GraphBuildingHandler extends DefaultHandler {
                     Double.parseDouble(attributes.getValue("lon")),
                     Double.parseDouble(attributes.getValue("lat"))
             );
+            lastNodeId = n.getId();
             g.addNode(n);
 
         } else if (qName.equals("way")) {
@@ -108,11 +116,12 @@ public class GraphBuildingHandler extends DefaultHandler {
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
                 .equals("name")) {
             /* While looking at a node, we found a <tag...> with k="name". */
-            /* TODO Create a location. */
-            /* Hint: Since we found this <tag...> INSIDE a node, we should probably remember which
-            node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
-            last node that you looked at (check the first if-case). */
-//            System.out.println("Node's name: " + attributes.getValue("v"));
+            if (lastNodeId != null) {
+                GraphDB.Node n = g.getNode(lastNodeId);
+                if (n != null) {
+                    n.setName(attributes.getValue("v"));
+                }
+            }
         }
     }
 
@@ -144,6 +153,8 @@ public class GraphBuildingHandler extends DefaultHandler {
                 }
             }
             lastWayId = null;
+        } else if (qName.equals("node")) {
+            lastNodeId = null;
         }
     }
 
