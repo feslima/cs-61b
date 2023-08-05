@@ -1,4 +1,3 @@
-import example.CSCourseDB;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -163,7 +162,7 @@ public class GraphDB {
         // uses a priority queue with each node computed distance to target
         PriorityQueue<NodeWithDistance> pq = new PriorityQueue<>();
         for (Long vertex : vertices()) {
-            pq.add(NodeWithDistance.fromNode(nodes.get(vertex), lat, lon));
+            pq.add(NodeWithDistance.fromNode(nodes.get(vertex), lon, lat));
         }
 
         NodeWithDistance closest = pq.poll();
@@ -204,18 +203,13 @@ public class GraphDB {
         toNode.connectTo(from, extraInfo);
     }
 
-    public void connectNodes(long from, long to) {
-        HashMap<String, String> wayInfo = new HashMap<>();
-        connectNodes(from, to, wayInfo);
-    }
-
     static class Node {
         private final long id;
         private final double latitude;
         private final double longitude;
         private final HashMap<Long, HashMap<String, String>> neighbors = new HashMap<>();
 
-        Node(long id, double latitude, double longitude) {
+        Node(long id, double longitude, double latitude) {
             this.id = id;
             this.latitude = latitude;
             this.longitude = longitude;
@@ -248,25 +242,34 @@ public class GraphDB {
                     ", latitude=" + latitude +
                     '}';
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return id == node.id && Double.compare(latitude, node.latitude) == 0 && Double.compare(longitude, node.longitude) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, latitude, longitude);
+        }
     }
 
-    static class NodeComparator implements Comparator<Node> {
-        private double longitude;
-        private double latitude;
-        private Map<Long, Double> gScore;
-        private Map<Long, Double> hScore;
+    static class NodeScoreComparator implements Comparator<Long> {
+        private final Map<Long, Double> gScore;
+        private final Map<Long, Double> hScore;
 
-        NodeComparator(double targetLon, double targetLat, Map<Long, Double> gScore, Map<Long, Double> hScore) {
-            longitude = targetLon;
-            latitude = targetLat;
+        NodeScoreComparator(Map<Long, Double> gScore, Map<Long, Double> hScore) {
             this.gScore = gScore;
             this.hScore = hScore;
         }
 
         @Override
-        public int compare(Node o1, Node o2) {
-            double d1 = gScore.get(o1.getId()) + hScore.get(o1.getId());
-            double d2 = gScore.get(o2.getId()) + hScore.get(o2.getId());
+        public int compare(Long o1, Long o2) {
+            double d1 = gScore.getOrDefault(o1, Double.POSITIVE_INFINITY) + hScore.getOrDefault(o1, Double.POSITIVE_INFINITY);
+            double d2 = gScore.getOrDefault(o2, Double.POSITIVE_INFINITY) + hScore.getOrDefault(o2, Double.POSITIVE_INFINITY);
             return Double.compare(d1, d2);
         }
     }
@@ -274,13 +277,13 @@ public class GraphDB {
     static class NodeWithDistance extends Node implements Comparable<NodeWithDistance> {
         private final double distance;
 
-        NodeWithDistance(long id, double latitude, double longitude, double lat, double lon) {
-            super(id, latitude, longitude);
+        NodeWithDistance(long id, double longitude, double latitude, double lon, double lat) {
+            super(id, longitude, latitude);
             this.distance = GraphDB.distance(longitude, latitude, lon, lat);
         }
 
-        static NodeWithDistance fromNode(Node node, double targetLat, double targetLon) {
-            return new NodeWithDistance(node.id, node.latitude, node.longitude, targetLat, targetLon);
+        static NodeWithDistance fromNode(Node node, double targetLon, double targetLat) {
+            return new NodeWithDistance(node.id, node.longitude, node.latitude, targetLon, targetLat);
         }
 
         @Override

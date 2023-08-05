@@ -73,8 +73,8 @@ public class GraphBuildingHandler extends DefaultHandler {
 
             GraphDB.Node n = new GraphDB.Node(
                     Long.parseLong(attributes.getValue("id")),
-                    Double.parseDouble(attributes.getValue("lat")),
-                    Double.parseDouble(attributes.getValue("lon"))
+                    Double.parseDouble(attributes.getValue("lon")),
+                    Double.parseDouble(attributes.getValue("lat"))
             );
             g.addNode(n);
 
