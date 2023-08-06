@@ -2,11 +2,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 
 /**
@@ -43,7 +39,6 @@ public class GraphBuildingHandler extends DefaultHandler {
     private final GraphDB g;
     private Long lastWayId;
     private Long lastNodeId;
-    private final HashMap<Long, WayEdge> ways = new HashMap<>();
 
     /**
      * Create a new GraphBuildingHandler.
@@ -90,14 +85,14 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* We encountered a new <way...> tag. */
             activeState = "way";
             lastWayId = Long.parseLong(attributes.getValue("id"));
-            WayEdge edge = ways.get(lastWayId);
+            GraphDB.WayEdge edge = g.getWay(lastWayId);
             if (edge == null) {
-                ways.put(lastWayId, new WayEdge(lastWayId));
+                g.addEdge(new GraphDB.WayEdge(lastWayId));
             }
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
 
-            WayEdge edge = ways.get(lastWayId);
+            GraphDB.WayEdge edge = g.getWay(lastWayId);
             if (edge != null) {
                 edge.addNodeRef(attributes.getValue("ref"));
             }
@@ -107,7 +102,10 @@ public class GraphBuildingHandler extends DefaultHandler {
             String k = attributes.getValue("k");
             String v = attributes.getValue("v");
 
-            WayEdge edge = ways.get(lastWayId);
+            if (lastWayId == null) {
+                return;
+            }
+            GraphDB.WayEdge edge = g.getWay(lastWayId);
             if (edge == null) {
                 return;
             }
@@ -143,51 +141,20 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* We are done looking at a way. (We finished looking at the nodes, speeds, etc...)*/
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
-            WayEdge edge = ways.get(lastWayId);
-            if (edge.isValid()) {
-                for (int i = 0; i < edge.nodeIds.size() - 1; i++) {
-                    long fromId = Long.parseLong(edge.nodeIds.get(i));
-                    long toId = Long.parseLong(edge.nodeIds.get(i + 1));
+            GraphDB.WayEdge edge = g.getWay(lastWayId);
+            if (edge != null && edge.isValid()) {
+                List<Long> nodeIds = edge.getNodes();
+                for (int i = 0; i < nodeIds.size() - 1; i++) {
+                    long fromId = nodeIds.get(i);
+                    long toId = nodeIds.get(i + 1);
 
                     g.connectNodes(fromId, toId, edge.getAttributes());
                 }
             }
             lastWayId = null;
+            activeState = "";
         } else if (qName.equals("node")) {
             lastNodeId = null;
-        }
-    }
-
-    static class WayEdge {
-        private final HashMap<String, String> attributes = new HashMap<>();
-        private final ArrayList<String> nodeIds = new ArrayList<>();
-
-        WayEdge(long id) {
-            attributes.put("wayId", String.valueOf(id));
-        }
-
-        public boolean isValid() {
-            String valid = attributes.get("highway");
-            if (valid == null) {
-                return false;
-            }
-            return ALLOWED_HIGHWAY_TYPES.contains(valid);
-        }
-
-        public HashMap<String, String> getAttributes() {
-            return attributes;
-        }
-
-        public void setAttribute(String key, String value) {
-            attributes.put(key, value);
-        }
-
-        public void addNodeRef(String nodeId) {
-            nodeIds.add(nodeId);
-        }
-
-        public Iterable<String> getNodes() {
-            return nodeIds;
         }
     }
 }

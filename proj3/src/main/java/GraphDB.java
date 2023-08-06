@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.Objects;
@@ -25,8 +28,14 @@ import javax.xml.parsers.SAXParserFactory;
  * @author Alan Yao, Josh Hug
  */
 public class GraphDB {
+    private static final Set<String> ALLOWED_HIGHWAY_TYPES = new HashSet<>(Arrays.asList
+            ("motorway", "trunk", "primary", "secondary", "tertiary", "unclassified",
+                    "residential", "living_street", "motorway_link", "trunk_link", "primary_link",
+                    "secondary_link", "tertiary_link"));
 
     private final Map<Long, Node> nodes = new LinkedHashMap<>();
+    private final HashMap<Long, WayEdge> ways = new HashMap<>();
+    private final HashMap<Long, HashSet<Long>> nodeToWay = new HashMap<>();
     /** Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc. */
 
@@ -204,6 +213,14 @@ public class GraphDB {
         return nodes.get(id);
     }
 
+    public WayEdge getWay(long id) {
+        return ways.get(id);
+    }
+
+    public void addEdge(WayEdge edge) {
+        ways.put(edge.id, edge);
+    }
+
     public void connectNodes(long from, long to, HashMap<String, String> extraInfo) {
         Node fromNode = nodes.get(from);
         Node toNode = nodes.get(to);
@@ -249,6 +266,10 @@ public class GraphDB {
 
         public Set<Long> getNeighbors() {
             return neighbors.keySet();
+        }
+
+        public HashMap<String, String> getNeighborData(long neighborId) {
+            return neighbors.get(neighborId);
         }
 
         public double distanceToCoord(double lon, double lat) {
@@ -319,6 +340,47 @@ public class GraphDB {
         @Override
         public int compareTo(NodeWithDistance o) {
             return Double.compare(distance, o.distance);
+        }
+    }
+
+    static class WayEdge {
+        private final HashMap<String, String> attributes = new HashMap<>();
+        private final ArrayList<Long> nodeIds = new ArrayList<>();
+        private final Set<Long> nodeIdsSet = new HashSet<>();
+        public final long id;
+
+        WayEdge(long id) {
+            this.id = id;
+            attributes.put("wayId", String.valueOf(id));
+        }
+
+        public boolean isValid() {
+            String valid = attributes.get("highway");
+            if (valid == null) {
+                return false;
+            }
+            return ALLOWED_HIGHWAY_TYPES.contains(valid);
+        }
+
+        public HashMap<String, String> getAttributes() {
+            return attributes;
+        }
+
+        public void setAttribute(String key, String value) {
+            attributes.put(key, value);
+        }
+
+        public void addNodeRef(String nodeId) {
+            nodeIds.add(Long.parseLong(nodeId));
+            nodeIdsSet.add(Long.parseLong(nodeId));
+        }
+
+        public List<Long> getNodes() {
+            return nodeIds;
+        }
+
+        public boolean hasNode(long id) {
+            return nodeIdsSet.contains(id);
         }
     }
 
