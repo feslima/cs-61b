@@ -113,9 +113,91 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        ArrayList<NavigationDirection> directions = new ArrayList<>();
+        int numNodes = route.size();
+
+        int i = 1;
+
+        long currentId = route.get(i);
+        long previousId = route.get(i - 1);
+        double previousLon = g.lon(previousId);
+        double previousLat = g.lat(previousId);
+
+        GraphDB.Node currentNode = g.getNode(route.get(i));
+        if (currentNode == null) {
+            return directions;
+        }
+
+        HashMap<String, String> currentEdge = currentNode.getNeighborData(previousId);
+
+        NavigationDirection current = new NavigationDirection();
+        current.direction = NavigationDirection.START;
+        String currentWayName = currentEdge.get("name");
+        current.way = currentWayName;
+        while (i < numNodes) {
+            long currentWayId = Long.parseLong(currentEdge.get("wayId"));
+            GraphDB.WayEdge way = g.getWay(currentWayId);
+
+            while (way.hasNode(currentId)) {
+                current.distance += currentNode.distanceToCoord(previousLon, previousLat);
+                i += 1;
+
+                if (i >= numNodes) {
+                    directions.add(current);
+                    current.direction = setDirection(g, currentId, previousId);
+                    break;
+                }
+
+                currentId = route.get(i);
+                previousId = route.get(i - 1);
+                previousLon = g.lon(previousId);
+                previousLat = g.lat(previousId);
+                currentNode = g.getNode(currentId);
+            }
+
+            currentEdge = currentNode.getNeighborData(previousId);
+            String wayStr = currentEdge.getOrDefault("name", "");
+            if (!wayStr.equals(currentWayName)) {
+                currentWayName = wayStr;
+                directions.add(current);
+                current = new NavigationDirection();
+                current.way = currentWayName;
+                current.direction = setDirection(g, route.get(i - 2), route.get(i - 1));
+            }
+
+        }
+
+        return directions;
     }
 
+    private static int setDirection(GraphDB g, long previousId, long currentId) {
+
+        double bearingAngle = g.bearing(previousId, currentId);
+
+        /*
+         * Between -15 and 15 degrees the direction should be “Continue straight”.
+         * Beyond -15 and 15 degrees but between -30 and 30 degrees the direction should be “Slight left/right”.
+         * Beyond -30 and 30 degrees but between -100 and 100 degrees the direction should be “Turn left/right”.
+         * Beyond -100 and 100 degrees the direction should be “Sharp left/right”.
+         * */
+        if (bearingAngle >= -15.0 && bearingAngle <= 15.0) {
+            return NavigationDirection.STRAIGHT;
+        } else if (bearingAngle > 15.0 && bearingAngle <= 30.0) {
+            return NavigationDirection.SLIGHT_RIGHT;
+        } else if (bearingAngle > 30.0 && bearingAngle <= 100.0) {
+            return NavigationDirection.RIGHT;
+        } else if (bearingAngle > 100.0) {
+            return NavigationDirection.SHARP_RIGHT;
+        } else if (bearingAngle < -15.0 && bearingAngle >= -30.0) {
+            return NavigationDirection.SLIGHT_LEFT;
+        } else if (bearingAngle < -30.0 && bearingAngle >= -100.0) {
+            return NavigationDirection.LEFT;
+        } else if (bearingAngle < -100.0) {
+            return NavigationDirection.SHARP_LEFT;
+        }
+
+        return NavigationDirection.START;
+    }
 
     /**
      * Class to represent a navigation direction, which consists of 3 attributes:
