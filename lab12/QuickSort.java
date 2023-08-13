@@ -77,13 +77,8 @@ public class QuickSort {
 
         Item pivot = getRandomItem(items);
         partition(items, pivot, less, equal, greater);
-        quickSort(less);
-        quickSort(greater);
 
-        Queue<Item> results = catenate(less, equal);
-        results = catenate(results, greater);
-
-        return results;
+        return catenate(catenate(quickSort(less), equal), quickSort(greater));
     }
 
     public static void main(String[] args) {
