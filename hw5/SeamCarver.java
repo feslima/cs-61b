@@ -1,13 +1,13 @@
 import edu.princeton.cs.algs4.Picture;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 public class SeamCarver {
     private Picture picture;
     private int width;
     private int height;
     private double[][] energy;
+    private double[][] cost;
 
     public SeamCarver(Picture picture) {
         this.picture = picture;
@@ -18,10 +18,31 @@ public class SeamCarver {
         width = picture.width();
         height = picture().height();
         energy = new double[height][width];
+        cost = new double[height][width];
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 energy(i, j);
+            }
+        }
+
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                double eij = energy[j][i];
+
+                if (j == 0) {
+                    cost[j][i] = eij;
+                } else {
+                    double[] row = cost[j - 1];
+
+                    double middle = row[i];
+                    double left = i == 0 ? Double.POSITIVE_INFINITY : row[i - 1];
+                    double right = i == width - 1 ? Double.POSITIVE_INFINITY : row[i + 1];
+                    double[] tmp = new double[]{left, middle, right};
+                    int minIdx = getMinIdx(tmp);
+
+                    cost[j][i] = eij + tmp[minIdx];
+                }
             }
         }
 
@@ -73,24 +94,24 @@ public class SeamCarver {
         return energy[y][x];
     }
 
-    private void transposeEnergy() {
+    private void transposeCost() {
         // not so efficient, but meh, it was in the assignment...
-        double[][] transposed = new double[energy[0].length][energy.length];
-        for (int i = 0; i < energy.length; i++) {
-            for (int j = 0; j < energy[0].length; j++) {
-                transposed[j][i] = energy[i][j];
+        double[][] transposed = new double[cost[0].length][cost.length];
+        for (int i = 0; i < cost.length; i++) {
+            for (int j = 0; j < cost[0].length; j++) {
+                transposed[j][i] = cost[i][j];
             }
         }
-        energy = transposed;
+        cost = transposed;
         width = transposed[0].length;
         height = transposed.length;
     }
 
     public int[] findHorizontalSeam()            // sequence of indices for horizontal seam
     {
-        transposeEnergy();
+        transposeCost();
         int[] ints = findVerticalSeam();
-        transposeEnergy(); // restore picture to original
+        transposeCost(); // restore picture to original
         return ints;
     }
 
@@ -110,13 +131,13 @@ public class SeamCarver {
 
     public int[] findVerticalSeam()              // sequence of indices for vertical seam
     {
-        int[] path = new int[energy.length];
+        int[] path = new int[cost.length];
         int current = 0;
-        double[] row = energy[0];
+        double[] row = cost[0];
         path[current] = getMinIdx(row);
         current = path[current];
-        for (int i = 1; i < energy.length; i++) {
-            row = energy[i];
+        for (int i = 1; i < cost.length; i++) {
+            row = cost[i];
 
             double middle = row[current];
             double left = current == 0 ? Double.POSITIVE_INFINITY : row[current - 1];
