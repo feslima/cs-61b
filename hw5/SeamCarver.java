@@ -131,27 +131,33 @@ public class SeamCarver {
 
     public int[] findVerticalSeam()              // sequence of indices for vertical seam
     {
+        // algorithm minimizes from bottom to top because the minimum cost will be found at bottom
         int[] path = new int[cost.length];
-        int current = 0;
-        double[] row = cost[0];
+        int current = cost.length - 1;
+        double[] row = cost[cost.length - 1];
         path[current] = getMinIdx(row);
-        current = path[current];
-        for (int i = 1; i < cost.length; i++) {
+        int pointer = path[current];
+        for (int i = current - 1; i >= 0; i--) {
             row = cost[i];
 
-            double middle = row[current];
-            double left = current == 0 ? Double.POSITIVE_INFINITY : row[current - 1];
-            double right = current == width - 1 ? Double.POSITIVE_INFINITY : row[current + 1];
+            pointer = path[i + 1];
+            double middle = row[pointer];
+            double left = pointer == 0 ? middle : row[pointer - 1]; // repeat middle when already on column 0
+            double right = pointer == width - 1 ? middle : row[pointer + 1]; // repeat middle when already on rightmost
 
             row = new double[]{left, middle, right};
             int minIdx = getMinIdx(row);
 
             if (minIdx == 0) {
-                current -= 1;
+                if (pointer > 0) {
+                    pointer -= 1; // only modify path if not on borders
+                }
             } else if (minIdx == 2) {
-                current += 1;
+                if (pointer < width - 1) {
+                    pointer += 1;
+                }
             }
-            path[i] = current;
+            path[i] = pointer;
         }
         return path;
     }
