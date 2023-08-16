@@ -10,7 +10,7 @@ public class SeamCarver {
     private double[][] cost;
 
     public SeamCarver(Picture picture) {
-        this.picture = picture;
+        this.picture = new Picture(picture);
         computePictureProperties(picture);
     }
 
