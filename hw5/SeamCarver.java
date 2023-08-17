@@ -26,14 +26,14 @@ public class SeamCarver {
         return transposed;
     }
 
-    private double[][] computeCostMatrix(double[][] energy) {
-        int w = energy[0].length;
-        int h = energy.length;
+    private double[][] computeCostMatrix(double[][] energyMatrix) {
+        int w = energyMatrix[0].length;
+        int h = energyMatrix.length;
         double[][] computedCost = new double[h][w];
 
         for (int j = 0; j < h; j++) {
             for (int i = 0; i < w; i++) {
-                double eij = energy[j][i];
+                double eij = energyMatrix[j][i];
 
                 if (j == 0) {
                     computedCost[j][i] = eij;
@@ -147,8 +147,12 @@ public class SeamCarver {
 
             pointer = path[i + 1];
             double middle = row[pointer];
-            double left = pointer == 0 ? middle : row[pointer - 1]; // repeat middle when already on column 0
-            double right = pointer == w - 1 ? middle : row[pointer + 1]; // repeat middle when already on rightmost
+
+            // repeat middle when already on column 0
+            double left = pointer == 0 ? middle : row[pointer - 1];
+
+            // repeat middle when already on rightmost
+            double right = pointer == w - 1 ? middle : row[pointer + 1];
 
             row = new double[]{left, middle, right};
             int minIdx = getMinIdx(row);
