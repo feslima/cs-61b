@@ -1,6 +1,6 @@
 import edu.princeton.cs.algs4.Picture;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class SeamCarver {
     private Picture picture;
@@ -27,12 +27,12 @@ public class SeamCarver {
     }
 
     private double[][] computeCostMatrix(double[][] energy) {
-        int width = energy[0].length;
-        int height = energy.length;
-        double[][] computedCost = new double[height][width];
+        int w = energy[0].length;
+        int h = energy.length;
+        double[][] computedCost = new double[h][w];
 
-        for (int j = 0; j < height; j++) {
-            for (int i = 0; i < width; i++) {
+        for (int j = 0; j < h; j++) {
+            for (int i = 0; i < w; i++) {
                 double eij = energy[j][i];
 
                 if (j == 0) {
@@ -42,7 +42,7 @@ public class SeamCarver {
 
                     double middle = row[i];
                     double left = i == 0 ? Double.POSITIVE_INFINITY : row[i - 1];
-                    double right = i == width - 1 ? Double.POSITIVE_INFINITY : row[i + 1];
+                    double right = i == w - 1 ? Double.POSITIVE_INFINITY : row[i + 1];
                     double[] tmp = new double[]{left, middle, right};
                     int minIdx = getMinIdx(tmp);
 
@@ -54,8 +54,8 @@ public class SeamCarver {
         return computedCost;
     }
 
-    private void computePictureProperties(Picture picture) {
-        width = picture.width();
+    private void computePictureProperties(Picture pic) {
+        width = pic.width();
         height = picture().height();
         energy = new double[height][width];
         cost = new double[height][width];
@@ -72,23 +72,19 @@ public class SeamCarver {
 
     }
 
-    public Picture picture()                       // current picture
-    {
+    public Picture picture() {
         return picture;
     }
 
-    public int width()                         // width of current picture
-    {
+    public int width() {
         return width;
     }
 
-    public int height()                        // height of current picture
-    {
+    public int height() {
         return height;
     }
 
-    public double energy(int x, int y)            // energy of pixel at column x and row y
-    {
+    public double energy(int x, int y) {
         if (x < 0 || x >= width) {
             throw new IndexOutOfBoundsException();
         }
@@ -119,8 +115,7 @@ public class SeamCarver {
     }
 
 
-    public int[] findHorizontalSeam()            // sequence of indices for horizontal seam
-    {
+    public int[] findHorizontalSeam() {
         return findSeam(transposedCost);
     }
 
@@ -140,7 +135,7 @@ public class SeamCarver {
 
     private int[] findSeam(double[][] costMatrix) {
         // algorithm minimizes from bottom to top because the minimum cost will be found at bottom
-        int width = costMatrix[0].length;
+        int w = costMatrix[0].length;
 
         int[] path = new int[costMatrix.length];
         int current = costMatrix.length - 1;
@@ -153,7 +148,7 @@ public class SeamCarver {
             pointer = path[i + 1];
             double middle = row[pointer];
             double left = pointer == 0 ? middle : row[pointer - 1]; // repeat middle when already on column 0
-            double right = pointer == width - 1 ? middle : row[pointer + 1]; // repeat middle when already on rightmost
+            double right = pointer == w - 1 ? middle : row[pointer + 1]; // repeat middle when already on rightmost
 
             row = new double[]{left, middle, right};
             int minIdx = getMinIdx(row);
@@ -163,7 +158,7 @@ public class SeamCarver {
                     pointer -= 1; // only modify path if not on borders
                 }
             } else if (minIdx == 2) {
-                if (pointer < width - 1) {
+                if (pointer < w - 1) {
                     pointer += 1;
                 }
             }
@@ -172,21 +167,20 @@ public class SeamCarver {
         return path;
     }
 
-    public int[] findVerticalSeam()              // sequence of indices for vertical seam
-    {
+    public int[] findVerticalSeam() {
         return findSeam(cost);
     }
 
     private void validateSeam(int[] seam) {
         for (int i = 0; i < seam.length - 1; i++) {
             if (Math.abs(seam[i] - seam[i + 1]) > 1) {
-                throw new IllegalArgumentException("Seam differs by more than 1 at elements " + i + " and " + (i + 1));
+                String msg = "Seam differs by more than 1 at elements " + i + " and " + (i + 1);
+                throw new IllegalArgumentException(msg);
             }
         }
     }
 
-    public void removeHorizontalSeam(int[] seam)   // remove horizontal seam from picture
-    {
+    public void removeHorizontalSeam(int[] seam) {
         if (seam.length > width) {
             throw new IllegalArgumentException("Seam larger than width.");
         }
@@ -196,8 +190,7 @@ public class SeamCarver {
         computePictureProperties(pic);
     }
 
-    public void removeVerticalSeam(int[] seam)     // remove vertical seam from picture
-    {
+    public void removeVerticalSeam(int[] seam) {
         if (seam.length > height) {
             throw new IllegalArgumentException("Seam larger than height.");
         }

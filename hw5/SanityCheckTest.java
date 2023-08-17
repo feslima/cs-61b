@@ -45,6 +45,16 @@ public class SanityCheckTest {
     }
 
     @Test
+    public void sanityVerticalSeamTest4x6() {
+        Picture p = new Picture("images/4x6.png");
+        SeamCarver sc = new SeamCarver(p);
+
+        int[] seam = sc.findVerticalSeam();
+        int[] expected = {0, 0, 1, 1, 0, 1};
+        assertArrayEquals(expected, seam);
+    }
+
+    @Test
     public void sanityHorizontalSeamTest() {
         Picture p = new Picture("images/6x5.png");
         SeamCarver sc = new SeamCarver(p);
