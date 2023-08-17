@@ -7,11 +7,51 @@ public class SeamCarver {
     private int width;
     private int height;
     private double[][] energy;
+    private double[][] transposedEnergy;
     private double[][] cost;
+    private double[][] transposedCost;
 
     public SeamCarver(Picture picture) {
         this.picture = new Picture(picture);
         computePictureProperties(picture);
+    }
+
+    private double[][] transposeMatrix(double[][] M) {
+        double[][] transposed = new double[M[0].length][M.length];
+        for (int i = 0; i < M.length; i++) {
+            for (int j = 0; j < M[0].length; j++) {
+                transposed[j][i] = M[i][j];
+            }
+        }
+        return transposed;
+    }
+
+    private double[][] computeCostMatrix(double[][] energy) {
+        int width = energy[0].length;
+        int height = energy.length;
+        double[][] computedCost = new double[height][width];
+
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                double eij = energy[j][i];
+
+                if (j == 0) {
+                    computedCost[j][i] = eij;
+                } else {
+                    double[] row = computedCost[j - 1];
+
+                    double middle = row[i];
+                    double left = i == 0 ? Double.POSITIVE_INFINITY : row[i - 1];
+                    double right = i == width - 1 ? Double.POSITIVE_INFINITY : row[i + 1];
+                    double[] tmp = new double[]{left, middle, right};
+                    int minIdx = getMinIdx(tmp);
+
+                    computedCost[j][i] = eij + tmp[minIdx];
+                }
+            }
+        }
+
+        return computedCost;
     }
 
     private void computePictureProperties(Picture picture) {
@@ -25,26 +65,10 @@ public class SeamCarver {
                 energy(i, j);
             }
         }
+        transposedEnergy = transposeMatrix(energy);
 
-        for (int j = 0; j < height; j++) {
-            for (int i = 0; i < width; i++) {
-                double eij = energy[j][i];
-
-                if (j == 0) {
-                    cost[j][i] = eij;
-                } else {
-                    double[] row = cost[j - 1];
-
-                    double middle = row[i];
-                    double left = i == 0 ? Double.POSITIVE_INFINITY : row[i - 1];
-                    double right = i == width - 1 ? Double.POSITIVE_INFINITY : row[i + 1];
-                    double[] tmp = new double[]{left, middle, right};
-                    int minIdx = getMinIdx(tmp);
-
-                    cost[j][i] = eij + tmp[minIdx];
-                }
-            }
-        }
+        cost = computeCostMatrix(energy);
+        transposedCost = computeCostMatrix(transposedEnergy);
 
     }
 
@@ -94,25 +118,10 @@ public class SeamCarver {
         return energy[y][x];
     }
 
-    private void transposeCost() {
-        // not so efficient, but meh, it was in the assignment...
-        double[][] transposed = new double[cost[0].length][cost.length];
-        for (int i = 0; i < cost.length; i++) {
-            for (int j = 0; j < cost[0].length; j++) {
-                transposed[j][i] = cost[i][j];
-            }
-        }
-        cost = transposed;
-        width = transposed[0].length;
-        height = transposed.length;
-    }
 
     public int[] findHorizontalSeam()            // sequence of indices for horizontal seam
     {
-        transposeCost();
-        int[] ints = findVerticalSeam();
-        transposeCost(); // restore picture to original
-        return ints;
+        return findSeam(transposedCost);
     }
 
     private int getMinIdx(double[] row) {
@@ -129,16 +138,17 @@ public class SeamCarver {
         return min;
     }
 
-    public int[] findVerticalSeam()              // sequence of indices for vertical seam
-    {
+    private int[] findSeam(double[][] costMatrix) {
         // algorithm minimizes from bottom to top because the minimum cost will be found at bottom
-        int[] path = new int[cost.length];
-        int current = cost.length - 1;
-        double[] row = cost[cost.length - 1];
+        int width = costMatrix[0].length;
+
+        int[] path = new int[costMatrix.length];
+        int current = costMatrix.length - 1;
+        double[] row = costMatrix[costMatrix.length - 1];
         path[current] = getMinIdx(row);
-        int pointer = path[current];
+        int pointer;
         for (int i = current - 1; i >= 0; i--) {
-            row = cost[i];
+            row = costMatrix[i];
 
             pointer = path[i + 1];
             double middle = row[pointer];
@@ -160,6 +170,11 @@ public class SeamCarver {
             path[i] = pointer;
         }
         return path;
+    }
+
+    public int[] findVerticalSeam()              // sequence of indices for vertical seam
+    {
+        return findSeam(cost);
     }
 
     private void validateSeam(int[] seam) {
