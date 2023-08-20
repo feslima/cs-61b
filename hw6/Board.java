@@ -29,7 +29,16 @@ public class Board {
     private final int width;
     private final int height;
     private final ArrayList<Integer[]> OFFSETS = new ArrayList<>();
-    public final Set<String> allCombinations = new HashSet<>();
+    private final Comparator<String> wordComparator = (o1, o2) -> {
+        /* for same length words, keep lexicographic ascending order.
+         * Otherwise, order words by size.
+         */
+        if (o1.length() == o2.length()) {
+            return o1.compareTo(o2);
+        }
+        return o2.length() - o1.length();
+    };
+    public final Set<String> allCombinations = new TreeSet<>(wordComparator);
     private final Trie trie;
 
     public Board(String[] rows, Trie trie) {
@@ -67,20 +76,7 @@ public class Board {
     }
 
     public List<String> getKLargestWords(int k) {
-        Comparator<String> wordComparator = (o1, o2) -> {
-            /* for same length words, keep lexicographic ascending order.
-             * Otherwise, order words by size.
-             */
-            if (o1.length() == o2.length()) {
-                return o1.compareTo(o2);
-            }
-            return o2.length() - o1.length();
-        };
-
-        Set<String> sortedSet = new TreeSet<>(wordComparator);
-        sortedSet.addAll(allCombinations);
-
-        return sortedSet.stream().limit(k).collect(Collectors.toList());
+        return allCombinations.stream().limit(k).collect(Collectors.toList());
     }
 
     public List<Cell> getNeighborsIndexes(int i, int j) {
