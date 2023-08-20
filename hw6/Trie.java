@@ -57,9 +57,8 @@ public class Trie {
     private TrieNode searchPrefix(String word) {
         TrieNode currentNode = root;
         for (Character ch : word.toCharArray()) {
-            if (currentNode.children.containsKey(ch)) {
-                currentNode = currentNode.children.get(ch);
-            } else {
+            currentNode = currentNode.children.get(ch);
+            if (currentNode == null) {
                 return null;
             }
         }
@@ -105,9 +104,8 @@ public class Trie {
     public boolean hasWord(String word) {
         TrieNode currentNode = root;
         for (Character ch : word.toCharArray()) {
-            if (currentNode.children.containsKey(ch)) {
-                currentNode = currentNode.children.get(ch);
-            } else {
+            currentNode = currentNode.children.get(ch);
+            if (currentNode == null) {
                 return false;
             }
         }
