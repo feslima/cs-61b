@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Boggle {
@@ -16,7 +17,36 @@ public class Boggle {
      *         have them in ascending alphabetical order.
      */
     public static List<String> solve(int k, String boardFilePath) {
-        // YOUR CODE HERE
-        return null;
+        if (k <= 0) {
+            throw new IllegalArgumentException("k must be positive.");
+        }
+        Board b = buildBoard(boardFilePath);
+        b.searchEntireBoard();
+        return b.getKLargestWords(k);
+    }
+
+    private static String[] getBoardRowsFromFile(String filepath) {
+        In in = new In(filepath);
+        ArrayList<String> rows = new ArrayList<>();
+        while (!in.isEmpty()) {
+            rows.add(in.readLine());
+        }
+
+        String[] results = new String[rows.size()];
+        for (int i = 0; i < rows.size(); i++) {
+            results[i] = rows.get(i);
+        }
+        return results;
+    }
+    private static Board buildBoard(String filepath) {
+        String[] rows = getBoardRowsFromFile(filepath);
+        Trie trie = Trie.buildTrieFromFile(dictPath);
+
+        return new Board(rows, trie);
+    }
+
+    public static void main(String[] args) {
+        Boggle.dictPath = "words.txt";
+        Object[] words = Boggle.solve(7, "smallBoard.txt").toArray();
     }
 }
