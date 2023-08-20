@@ -33,4 +33,11 @@ public class TestBoggle {
 
         assertArrayEquals(expected, words);
     }
+
+    @Test
+    public void testSmallBoard() {
+        Boggle.dictPath = "words.txt";
+        Object[] words = Boggle.solve(7, "smallBoard.txt").toArray();
+        assertTrue(words.length > 0);
+    }
 }

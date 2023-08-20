@@ -29,16 +29,7 @@ public class Board {
     private final int width;
     private final int height;
     private final ArrayList<Integer[]> OFFSETS = new ArrayList<>();
-    private final Comparator<String> wordComparator = (o1, o2) -> {
-        /* for same length words, keep lexicographic ascending order.
-         * Otherwise, order words by size.
-         */
-        if (o1.length() == o2.length()) {
-            return o1.compareTo(o2);
-        }
-        return o2.length() - o1.length();
-    };
-    public final Set<String> allCombinations = new TreeSet<>(wordComparator);
+    public final Set<String> allCombinations = new TreeSet<>(Trie.WORD_COMPARATOR);
     private final Trie trie;
 
     public Board(String[] rows, Trie trie) {

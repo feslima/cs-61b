@@ -19,6 +19,16 @@ public class Trie {
 
     private final TrieNode root;
 
+    public static final Comparator<String> WORD_COMPARATOR = (o1, o2) -> {
+        /* for same length words, keep lexicographic ascending order.
+         * Otherwise, order words by size.
+         */
+        if (o1.length() == o2.length()) {
+            return o1.compareTo(o2);
+        }
+        return o2.length() - o1.length();
+    };
+
     public Trie(Iterable<String> words) {
         root = new TrieNode(true);
 

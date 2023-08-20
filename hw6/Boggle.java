@@ -44,4 +44,9 @@ public class Boggle {
 
         return new Board(rows, trie);
     }
+
+    public static void main(String[] args) {
+        Boggle.dictPath = "words.txt";
+        Object[] words = Boggle.solve(7, "smallBoard.txt").toArray();
+    }
 }
